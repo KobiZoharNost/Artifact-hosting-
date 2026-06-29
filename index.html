@@ -1,876 +1,412 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Nostromo TES — Dispatch Control v5</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Nostromo Forecast ML — Deep Dive</title>
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { width: 100%; height: 100%; overflow: hidden; background: #0d1117; color: #e2e8f0; font-family: 'Segoe UI', system-ui, sans-serif; }
-#app { display: flex; flex-direction: column; height: 100vh; }
-#titlebar { height: 40px; background: #080c14; border-bottom: 1px solid #14213a; display: flex; align-items: center; justify-content: space-between; padding: 0 12px; flex-shrink: 0; }
-.tl { font-size: 9.5px; font-weight: 700; letter-spacing: .1em; color: #2a3d5c; text-transform: uppercase; white-space: nowrap; }
-.scrubwrap { flex: 1; display: flex; align-items: center; gap: 7px; margin: 0 14px; max-width: 360px; }
-.scrubwrap .ph { font-size: 8px; color: #2a3d5c; font-family: 'Courier New', monospace; }
-#scrub { flex: 1; }
-.tr { display: flex; align-items: center; gap: 8px; }
-#clock { font-size: 14px; font-weight: 700; color: #38bdf8; font-family: 'Courier New', monospace; }
-#badge { padding: 2px 10px; border-radius: 10px; font-size: 8.5px; font-weight: 700; letter-spacing: .08em; background: #0d1117; border: 1px solid #14213a; color: #14213a; transition: all .3s; white-space: nowrap; }
-.tbtn { padding: 3px 8px; background: #0b1424; border: 1px solid #1e3050; border-radius: 4px; color: #5b7bb8; font-size: 9px; font-weight: 700; cursor: pointer; }
-.tbtn:hover { background: #13203a; }
-#playbtn { padding: 3px 12px; background: #0b1e38; border: 1px solid #1d4ed8; border-radius: 4px; color: #60a5fa; font-size: 9.5px; font-weight: 700; cursor: pointer; }
-#playbtn:hover { background: #152d52; }
-#main { flex: 1; display: flex; overflow: hidden; min-height: 0; }
-#lp, #rp { width: 212px; flex-shrink: 0; background: #080c14; overflow-y: auto; padding: 10px 9px; scrollbar-width: thin; scrollbar-color: #14213a transparent; }
-#lp { border-right: 1px solid #14213a; } #rp { border-left: 1px solid #14213a; }
-#ctr { flex: 1; position: relative; overflow: hidden; min-width: 0; }
-#cv { display: block; }
-.role { font-size: 7px; letter-spacing: .08em; text-transform: uppercase; color: #2a3d5c; border: 1px solid #14213a; border-radius: 4px; padding: 4px 6px; margin-bottom: 10px; background: #0a0e18; }
-.role b { color: #60a5fa; } .role.n b { color: #a78bfa; }
-.pl { font-size: 7.5px; text-transform: uppercase; letter-spacing: .12em; color: #1e3050; margin-bottom: 5px; font-weight: 700; }
-.sec { margin-bottom: 12px; }
-.stg { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-bottom: 10px; }
-.sc { background: #0a0e18; border: 1px solid #14213a; border-left: 2px solid #14213a; border-radius: 5px; padding: 5px 7px; }
-.sc .sl { font-size: 6.5px; text-transform: uppercase; color: #1e3050; }
-.sc .sv { font-size: 13px; font-weight: 700; color: #38bdf8; margin-top: 1px; }
-.trk { background: #0a0e18; border: 1px solid #14213a; border-left: 2px solid #a78bfa; border-radius: 5px; padding: 6px 8px; margin-bottom: 11px; }
-.trkr { display: flex; justify-content: space-between; align-items: center; font-size: 7.5px; color: #3a5070; padding: 2px 0; }
-.trkr b { font-size: 8.5px; font-weight: 700; }
-#log { height: 168px; overflow-y: auto; background: #0a0e18; border: 1px solid #14213a; border-radius: 5px; padding: 6px; font-size: 8px; font-family: 'Courier New', monospace; margin-bottom: 9px; scrollbar-width: thin; scrollbar-color: #14213a transparent; }
-.ll { padding: 1.5px 0; border-bottom: 1px solid #080c14; color: #1e3050; }
-.ll.a { color: #34d399; } .ll.w { color: #fbbf24; } .ll.x { color: #f87171; } .ll.b { color: #60a5fa; }
-.srow { margin-bottom: 8px; }
-.srh { display: flex; justify-content: space-between; font-size: 7.5px; color: #2a3d5c; margin-bottom: 3px; }
-.srh span:last-child { color: #60a5fa; font-weight: 700; }
-input[type=range] { width: 100%; -webkit-appearance: none; height: 3px; border-radius: 2px; background: #14213a; outline: none; cursor: pointer; }
-input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 10px; height: 10px; border-radius: 50%; background: #38bdf8; border: 2px solid #080c14; }
-#scrub::-webkit-slider-thumb { background: #a78bfa; }
-#pc { display: block; width: 100% !important; }
-.ibox { background: #0a0e18; border: 1px solid #14213a; border-radius: 5px; padding: 8px; font-size: 7.5px; color: #1e3050; line-height: 1.85; margin-top: 8px; }
-.ibox b { color: #a78bfa; }
+  :root{
+    --s900:#0f172a; --s700:#334155; --s600:#475569; --s500:#64748b; --s400:#94a3b8;
+    --s200:#e2e8f0; --s100:#f1f5f9; --s50:#f8fafc;
+    --arma:#2563eb; --greykite:#16a34a; --lstm:#7c3aed; --prophet:#ea580c;
+    --amber-bg:#fffbeb; --amber-bd:#fde68a; --blue-bg:#eff6ff; --blue-bd:#bfdbfe;
+    --slate-bg:#f8fafc; --slate-bd:#e2e8f0;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:#fff;color:var(--s700);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;}
+  .wrap{max-width:1180px;margin:0 auto;}
+  .kicker{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#ea580c;}
+  h1{font-size:24px;font-weight:800;color:var(--s900);margin:2px 0 0;line-height:1.15;}
+  .sub{font-size:12px;color:#0f766e;font-weight:600;margin-top:4px;}
+  .sub b{color:#0f766e;}
+  header{padding:18px 24px 12px;border-bottom:1px solid var(--s200);}
+  .row{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+  select,button{font-family:inherit;}
+  select{font-size:13px;border:1px solid var(--s200);border-radius:6px;padding:5px 8px;background:#fff;}
+  .btn{font-size:12px;padding:7px 12px;border-radius:6px;border:1px solid var(--s200);background:#fff;color:var(--s600);cursor:pointer;}
+  .btn:hover{background:var(--s50);}
+  .btn-dark{background:var(--s900);color:#fff;border-color:var(--s900);}
+  .btn-dark:hover{background:#1e293b;}
+  .prog{display:flex;gap:6px;margin-top:12px;}
+  .seg{flex:1;cursor:pointer;border:none;background:none;padding:0;text-align:left;}
+  .seg .bar{height:6px;border-radius:99px;background:var(--s200);overflow:hidden;}
+  .seg .fill{height:100%;border-radius:99px;background:var(--s900);width:0;transition:width .5s;}
+  .seg .lbl{margin-top:4px;font-size:10px;color:var(--s400);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .seg.active .lbl{color:var(--s900);font-weight:700;}
+  #stage{padding:20px 24px;min-height:540px;}
+  footer{padding:14px 24px;border-top:1px solid var(--s200);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+  .muted{font-size:11px;color:var(--s400);}
+  .grid3{display:grid;grid-template-columns:2fr 1fr;gap:20px;}
+  .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}
+  @media(max-width:980px){.grid3{grid-template-columns:1fr}.grid4{grid-template-columns:repeat(2,1fr)}}
+  .card{border:1px solid var(--s200);border-radius:10px;}
+  .panelbox{border:1px solid var(--s200);border-radius:10px;padding:12px;}
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  th{font-size:11px;color:var(--s500);font-weight:700;background:var(--s100);padding:8px 12px;text-align:left;}
+  td{padding:6px 12px;border-top:1px solid var(--s100);}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;}
+  .right{text-align:right;}
+  .sticky{border:1px solid var(--amber-bd);background:var(--amber-bg);border-radius:10px;padding:12px;font-size:12px;line-height:1.5;color:var(--s600);margin-bottom:12px;}
+  .sticky.blue{border-color:var(--blue-bd);background:var(--blue-bg);}
+  .sticky.slate{border-color:var(--slate-bd);background:var(--slate-bg);}
+  .sticky .t{font-weight:700;color:var(--s900);margin-bottom:4px;}
+  .code{margin-top:6px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10.5px;background:var(--s100);color:var(--s700);border-radius:5px;padding:6px 8px;white-space:pre-wrap;overflow-x:auto;}
+  .chip{display:inline-flex;align-items:center;gap:6px;font-size:11px;padding:2px 9px;border-radius:99px;}
+  .dot{width:6px;height:6px;border-radius:99px;}
+  .pulse{animation:pulse 1s infinite;}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+  .modelcard{border:2px solid var(--s200);border-radius:12px;padding:12px;background:#fff;}
+  .layer{font-family:ui-monospace,Menlo,monospace;font-size:9px;padding:2px 6px;border-radius:4px;border:1px solid var(--s100);color:#cbd5e1;margin-bottom:3px;transition:all .3s;}
+  .layer.on{border-color:#ddd6fe;background:#f5f3ff;color:#6d28d9;}
+  .stagebtn{padding:6px 12px;border-radius:99px;font-size:12px;border:1px solid var(--s200);background:#fff;color:var(--s400);cursor:pointer;margin-right:6px;margin-bottom:6px;}
+  .stagebtn.cur{background:var(--s900);color:#fff;border-color:var(--s900);}
+  .stagebtn.done{background:var(--s100);color:var(--s600);}
+  .lbrow{transition:background .5s;}
+  .lbrow.win{background:#f0fdf4;}
+  .ship{font-size:10px;font-weight:700;color:#15803d;background:#dcfce7;padding:2px 8px;border-radius:99px;}
+  .barwrap{height:8px;border-radius:99px;background:var(--s100);overflow:hidden;}
+  .barfill{height:100%;border-radius:99px;transition:width .5s;}
+  .urlbox{font-family:ui-monospace,Menlo,monospace;font-size:12px;background:var(--s900);color:#86efac;border-radius:6px;padding:8px 12px;margin-top:8px;word-break:break-all;}
+  .floatformula{position:absolute;top:14px;right:18px;font-family:ui-monospace,monospace;font-size:12px;background:var(--s900);color:#fff;padding:4px 8px;border-radius:6px;transition:opacity .5s;}
+  .center{text-align:center}
 </style>
 </head>
 <body>
-<div id="app">
-  <div id="titlebar">
-    <span class="tl">Nostromo TES · Dispatch Control v5 · SLC DC</span>
-    <div class="scrubwrap">
-      <span class="ph">00:00</span>
-      <input type="range" id="scrub" min="0" max="1" step="0.001" value="0" oninput="onScrub()">
-      <span class="ph">24:00</span>
-    </div>
-    <div class="tr">
-      <span id="badge">STANDBY</span>
-      <span id="clock">00:00</span>
-      <button class="tbtn" id="spd" onclick="cycleSpeed()">1×</button>
-      <button class="tbtn" id="png" onclick="exportPNG()">⤓ PNG</button>
-      <button id="playbtn" onclick="toggleSim()">▶ Start</button>
-    </div>
-  </div>
-  <div id="main">
-    <!-- LEFT PANEL · CUSTOMER SCADA -->
-    <div id="lp">
-      <div class="role"><b>Customer SCADA</b> — what the facility sees</div>
-      <div class="sec"><div class="pl">Ambient (live · SLC)</div><svg id="gAmb" viewBox="0 0 192 30" height="30" style="width:100%"></svg></div>
-      <div class="sec"><div class="pl">Main Meter — Chiller + DC kW</div><div style="display:flex;align-items:center;justify-content:center"><svg id="gM" width="190" height="112" viewBox="0 0 190 120"></svg></div></div>
-      <div class="sec"><div class="pl">Supply Temp to DC (target 60°F)</div><div style="display:flex;align-items:center;justify-content:center"><svg id="gT" width="190" height="112" viewBox="0 0 190 120"></svg></div></div>
-      <div class="sec"><div class="pl">IceBricks SOC</div><svg id="socS" viewBox="0 0 192 26" height="26" style="width:100%"></svg></div>
-      <div class="stg">
-        <div class="sc"><div class="sl">Chillers On</div><div class="sv" id="sv1">8</div></div>
-        <div class="sc"><div class="sl">TES Relief</div><div class="sv" id="sv2" style="color:#34d399">0</div></div>
-        <div class="sc"><div class="sl">Peak Shave</div><div class="sv" id="sv3" style="color:#34d399">0.0 MW</div></div>
-        <div class="sc"><div class="sl">V2 Mix Cold</div><div class="sv" id="sv4" style="color:#a78bfa">—</div></div>
+<div class="wrap">
+  <header>
+    <div class="row">
+      <div>
+        <div class="kicker">Nostromo Energy · Forecast ML Deep-Dive</div>
+        <h1 id="ptitle">1. The Raw Training Data</h1>
+        <div class="sub">Prediction horizon: <b>5 days ahead</b>, hourly — driven by a 5-day weather forecast; each day covers the 09:00–21:00 discharge window</div>
       </div>
-      <div class="pl">Optimizer Tracking (real-time)</div>
-      <div class="trk" id="trk"></div>
-      <div class="pl">24h Day-Ahead Profile</div>
-      <canvas id="pc" height="84"></canvas>
-    </div>
-
-    <div id="ctr"><canvas id="cv"></canvas></div>
-
-    <!-- RIGHT PANEL · NOSTROMO OPTIMIZER -->
-    <div id="rp">
-      <div class="role n"><b>Nostromo Optimizer</b> — dispatch engine</div>
-      <div class="pl">Optimizer Feed</div>
-      <div id="log"></div>
-      <div class="pl">Scenario Controls</div>
-      <div class="srow"><div class="srh"><span>IT Load</span><span id="li">20.0 MW</span></div><input type="range" id="si" min="18" max="22" step="0.1" value="20" oninput="onSl()"></div>
-      <div class="srow"><div class="srh"><span>Ambient Peak (SLC)</span><span id="la">88 °F</span></div><input type="range" id="sa" min="68" max="105" step="1" value="88" oninput="onSl()"></div>
-      <div class="srow"><div class="srh"><span>IceBricks Capacity</span><span id="lc">15 TRh</span></div><input type="range" id="sc_" min="8" max="25" step="1" value="15" oninput="onSl()"></div>
-      <div class="ibox">
-        <b>Causal chain</b><br>
-        Ambient ↑ → chiller COP ↓ → chillers pull more kW → meter climbs. Supply held at 60°F.<br><br>
-        <b>Optimizer</b><br>
-        Forecasts the day-ahead peak, commits a meter target (31.5 MW) under the 33 MW cap, and dispatches TES in real time to hold it — tracking actual vs target continuously.<br><br>
-        <b>Water side (customer)</b><br>
-        60°F → DC → 70°F return → HX precool → chiller. HX precools only while TES discharges.<br><br>
-        <b>Glycol side (Nostromo)</b><br>
-        IceBricks 32°F → V2 blends with ~65°F bypass → 60°F at HX. Heat picked up across HX (60→65°F), then re-chilled to 32°F inside IceBricks.<br><br>
-        <b>V1</b> mode valve — CHARGE off-peak / DISCHARGE on peak.
+      <div class="row" style="gap:10px">
+        <label class="muted">HCS</label>
+        <select id="hcs"></select>
+        <button class="btn btn-dark" id="autoBtn">Auto ▮▮</button>
       </div>
     </div>
-  </div>
+    <div class="prog" id="prog"></div>
+  </header>
+  <div id="stage"></div>
+  <footer>
+    <button class="btn" id="prevBtn">◀ Prev</button>
+    <div class="muted">COOLING (RT, primary) · POWER (kW); if POWER unavailable → mock = COOLING × 2 (METER_FACTOR = 2)</div>
+    <div style="display:flex;gap:8px">
+      <button class="btn" id="replayBtn">↻ Replay</button>
+      <button class="btn btn-dark" id="nextBtn">Next ▶</button>
+    </div>
+  </footer>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script>
-// ═══ COLOR PALETTE (stream temperatures) ═══
-const C={ sup:'#38bdf8', pre:'#7dd3fc', ret:'#f87171', cold:'#34d399', mix:'#22d3ee', warm:'#fbbf24', chg:'#60a5fa', cmd:'#a78bfa', plate:'#a5b4fc' };
+/* ============================ data + config ============================ */
+var MODELS = {
+  arma:{name:"ARMA",icon:"🧮",hex:"#2563eb"},
+  greykite:{name:"Greykite",icon:"📈",hex:"#16a34a"},
+  lstm:{name:"LSTM",icon:"🧠",hex:"#7c3aed"},
+  prophet:{name:"Prophet",icon:"📊",hex:"#ea580c"}
+};
+var ORDER=["arma","greykite","lstm","prophet"];
+var HCS_IDS=["HCS-LV-014","HCS-PHX-022","HCS-ATX-009"];
+var TITLES=["The Raw Training Data","Preprocessing","Four Models, Four Strategies","Ensemble","Model Selection"];
+var PANEL_MS=8000;
+var FC_HOURS=[9,10,11,12,13,14,15,16,17,18,19,20,21];
 
-// ═══ TUNED MODEL CONSTANTS (validated over a full simulated day) ═══
-const TGT=31.5;          // optimizer meter target (MW), under 33 cap
-const CAP_MW=33;         // facility meter cap
-const RELIEF_MAX=4.0;    // max peak-shave capability (MW)
-const DISCH_K=0.063;     // SOC discharge coefficient
-const CHG_K=0.030;       // SOC overnight recharge coefficient
-const DEMAND_RATE=18;    // $/kW-month demand charge
+function pad(n){return (""+n).padStart(2,"0");}
+function hourOf(i){var base=Date.UTC(2025,0,1,0,0,0);return new Date(base+i*3600000).getUTCHours();}
+function fmtTs(i){var base=Date.UTC(2025,0,1,0,0,0);var d=new Date(base+i*3600000);
+  return d.getUTCFullYear()+"-"+pad(d.getUTCMonth()+1)+"-"+pad(d.getUTCDate())+" "+pad(d.getUTCHours())+":00";}
+function rowFor(i){var h=hourOf(i),daily=Math.sin(((h-6)/24)*2*Math.PI);
+  var temp=(22+9*daily+(i%5)-2).toFixed(1);
+  var hum=Math.max(20,Math.min(95,55-25*daily+(i%7)-3)).toFixed(0);
+  var inWin=h>=9&&h<=21;
+  var val=(inWin?180+70*daily+(i%11)*2:60+30*daily+(i%9)).toFixed(0);
+  return {i:i,ts:fmtTs(i),temp:temp,hum:hum,val:val};}
+function modelForecast(key){var adj={arma:-8,greykite:6,lstm:2,prophet:12};
+  return FC_HOURS.map(function(h,idx){
+    var base=120+70*Math.sin(((h-9)/12)*Math.PI);
+    var wob={arma:Math.sin(idx)*10,greykite:Math.cos(idx)*6,lstm:Math.sin(idx/1.5)*8,prophet:Math.cos(idx/2)*9}[key];
+    var y=Math.round(base+wob+adj[key]);return {h:h,y:y,lo:y-18,hi:y+18};});}
+function buildPre(){var N=200,a=[];for(var i=0;i<N;i++){var h=hourOf(i),daily=Math.sin(((h-6)/24)*2*Math.PI);
+  var v=150+65*daily+Math.sin(i/3)*8,outlier=false,gap=false;
+  if(i===40||i===95||i===150){v=4;outlier=true;}
+  if(i===70||i===71||i===130){gap=true;}
+  a.push({i:i,h:h,raw:Math.round(v),outlier:outlier,gap:gap});}return a;}
 
-// ═══ STATE ═══
-const S={ run:false, t:0, speed:1/2200, it:20, amb:88, cap:15,
-  soc:1.0, lvl:0, meter:27.2, rawMeter:27.2, temp:60.0,
-  ambNow:68.5, cop:6.0, chillerAux:8, chargeMW:0, reliefMW:0,
-  nRun:8, nRel:0, charging:false, rawPeak:27.2, actPeak:27.2,
-  fW:0, fG:0, fC:0, tgt:TGT };
-// day-ahead FORECAST profile (what the optimizer published at 22:00 prior day)
-const MC=[27.2,26.8,26.5,26.3,26.2,26.5,27.1,28.0,29.2,30.1,30.8,31.4,31.9,32.2,32.5,32.4,32.1,31.6,31.0,30.2,29.4,28.6,27.9,27.4];
-const DC_=[0,0,0,0,0,0,0,0,0,0,0,0.5,1.2,2.0,2.8,2.6,2.2,1.6,0.8,0,0,0,0,0];
-
-// ═══ CANVAS ═══
-const cv=document.getElementById('cv'), cx=cv.getContext('2d');
-function resize(){ const e=document.getElementById('ctr'); cv.width=e.clientWidth; cv.height=e.clientHeight; }
-resize(); window.addEventListener('resize',resize);
-const VW=920, VH=548;
-function sc(){ const s=Math.min(cv.width/VW,cv.height/VH); return {s,ox:(cv.width-VW*s)/2,oy:(cv.height-VH*s)/2}; }
-function X(x){ const{s,ox}=sc(); return ox+x*s; }
-function Y(y){ const{s,oy}=sc(); return oy+y*s; }
-function D(v){ return sc().s*v; }
-
-// ═══ DRAW UTILS ═══
-function rr(x,y,w,h,r,fill,stroke,lw){
-  if(lw===undefined) lw=1.5;
-  cx.beginPath();
-  cx.moveTo(X(x+r),Y(y)); cx.lineTo(X(x+w-r),Y(y)); cx.arcTo(X(x+w),Y(y),X(x+w),Y(y+r),D(r));
-  cx.lineTo(X(x+w),Y(y+h-r)); cx.arcTo(X(x+w),Y(y+h),X(x+w-r),Y(y+h),D(r));
-  cx.lineTo(X(x+r),Y(y+h)); cx.arcTo(X(x),Y(y+h),X(x),Y(y+h-r),D(r));
-  cx.lineTo(X(x),Y(y+r)); cx.arcTo(X(x),Y(y),X(x+r),Y(y),D(r)); cx.closePath();
-  if(fill){cx.fillStyle=fill;cx.fill();} if(stroke){cx.strokeStyle=stroke;cx.lineWidth=D(lw);cx.stroke();}
-}
-function t(s,x,y,col,sz,w,a){
-  cx.fillStyle=col||'#94a3b8'; cx.textAlign=a||'center'; cx.textBaseline='middle';
-  cx.font=`${w||'normal'} ${D(sz||9.5)}px 'Segoe UI',sans-serif`; cx.fillText(s,X(x),Y(y));
-}
-function glow(x,y,r,col,a){ const g=cx.createRadialGradient(X(x),Y(y),0,X(x),Y(y),D(r)); g.addColorStop(0,col.replace('rgb(','rgba(').replace(')',`,${a})`)); g.addColorStop(1,'rgba(0,0,0,0)'); cx.fillStyle=g; cx.beginPath(); cx.arc(X(x),Y(y),D(r),0,Math.PI*2); cx.fill(); }
-
-// animated dashed pipe with flow
-function pipe(pts,col,lw,off,alpha,speed){
-  if(speed===undefined) speed=1;
-  cx.save(); cx.globalAlpha=alpha; cx.strokeStyle=col; cx.lineWidth=D(lw);
-  cx.lineJoin='round'; cx.lineCap='round';
-  cx.setLineDash([D(11),D(6)]); cx.lineDashOffset=-(off*speed%(D(11)+D(6)));
-  cx.beginPath(); cx.moveTo(X(pts[0][0]),Y(pts[0][1]));
-  for(let i=1;i<pts.length;i++) cx.lineTo(X(pts[i][0]),Y(pts[i][1]));
-  cx.stroke(); cx.restore();
-}
-// gradient-stroked animated pipe (shows a temperature transition along its run)
-function gradPipe(pts,c1,c2,lw,off,alpha){
-  const x0=X(pts[0][0]),y0=Y(pts[0][1]),x1=X(pts[pts.length-1][0]),y1=Y(pts[pts.length-1][1]);
-  const g=cx.createLinearGradient(x0,y0,x1,y1); g.addColorStop(0,c1); g.addColorStop(1,c2);
-  cx.save(); cx.globalAlpha=alpha; cx.strokeStyle=g; cx.lineWidth=D(lw); cx.lineJoin='round'; cx.lineCap='round';
-  cx.setLineDash([D(11),D(6)]); cx.lineDashOffset=-(off%(D(11)+D(6)));
-  cx.beginPath(); cx.moveTo(x0,y0); for(let i=1;i<pts.length;i++) cx.lineTo(X(pts[i][0]),Y(pts[i][1])); cx.stroke(); cx.restore();
-}
-function solidLine(pts,col,lw){
-  cx.save(); cx.strokeStyle=col; cx.lineWidth=D(lw); cx.lineJoin='round'; cx.setLineDash([]);
-  cx.beginPath(); cx.moveTo(X(pts[0][0]),Y(pts[0][1]));
-  for(let i=1;i<pts.length;i++) cx.lineTo(X(pts[i][0]),Y(pts[i][1]));
-  cx.stroke(); cx.restore();
-}
-// color interpolation between two hex colors
-function lerpHex(c1,c2,t){
-  t=Math.max(0,Math.min(1,t));
-  const a=parseInt(c1.slice(1),16), b=parseInt(c2.slice(1),16);
-  const r=Math.round(((a>>16)&255)*(1-t)+((b>>16)&255)*t);
-  const g=Math.round(((a>>8)&255)*(1-t)+((b>>8)&255)*t);
-  const bl=Math.round((a&255)*(1-t)+(b&255)*t);
-  return 'rgb('+r+','+g+','+bl+')';
-}
-function dottedLine(pts,col,alpha){
-  if(alpha===undefined) alpha=0.3;
-  cx.save(); cx.strokeStyle=col; cx.lineWidth=D(0.8); cx.globalAlpha=alpha; cx.lineJoin='round'; cx.setLineDash([D(3),D(5)]);
-  cx.beginPath(); cx.moveTo(X(pts[0][0]),Y(pts[0][1]));
-  for(let i=1;i<pts.length;i++) cx.lineTo(X(pts[i][0]),Y(pts[i][1]));
-  cx.stroke(); cx.restore();
-}
-// flow-direction arrowhead (ang: 0=right, PI/2=down, -PI/2=up, PI=left)
-function arrow(x,y,ang,col,sz,alpha){
-  sz=sz||5.5; cx.save(); cx.globalAlpha=alpha===undefined?1:alpha;
-  cx.translate(X(x),Y(y)); cx.rotate(ang); cx.fillStyle=col;
-  cx.beginPath(); cx.moveTo(D(sz),0); cx.lineTo(-D(sz*0.65),-D(sz*0.7)); cx.lineTo(-D(sz*0.65),D(sz*0.7)); cx.closePath(); cx.fill();
-  cx.restore();
-}
-
-// ── P&ID SYMBOLS ──
-function pump(pcx,pcy,pr,lbl,tag,dir){
-  const d={right:[1,0],left:[-1,0],up:[0,-1],down:[0,1]}[dir]||[1,0];
-  const p=[-d[1],d[0]];
-  cx.save();
-  cx.beginPath(); cx.arc(X(pcx),Y(pcy),D(pr),0,Math.PI*2);
-  cx.fillStyle='#06090f'; cx.fill(); cx.strokeStyle='#3b82f6'; cx.lineWidth=D(1.5); cx.stroke();
-  cx.fillStyle='#3b82f6';
-  cx.beginPath();
-  cx.moveTo(X(pcx+d[0]*pr*.55),Y(pcy+d[1]*pr*.55));
-  cx.lineTo(X(pcx+p[0]*pr*.32-d[0]*pr*.18),Y(pcy+p[1]*pr*.32-d[1]*pr*.18));
-  cx.lineTo(X(pcx-p[0]*pr*.32-d[0]*pr*.18),Y(pcy-p[1]*pr*.32-d[1]*pr*.18));
-  cx.closePath(); cx.fill(); cx.restore();
-  if(lbl) t(lbl,pcx,pcy+pr+8,'#3a5070',6.5,'700');
-  if(tag) t(tag,pcx,pcy+pr+16,'#2a3d5c',5.5,'700');
-}
-
-// ISA instrument bubble: function letters (top) + loop number (bottom), field line optional
-function isa(x,y,fn,loop,col,r){
-  col=col||'#475569'; r=r||10;
-  cx.save();
-  cx.beginPath(); cx.arc(X(x),Y(y),D(r),0,Math.PI*2);
-  cx.fillStyle='#06090f'; cx.fill(); cx.strokeStyle=col; cx.lineWidth=D(1.1); cx.stroke();
-  cx.beginPath(); cx.moveTo(X(x-r),Y(y)); cx.lineTo(X(x+r),Y(y)); cx.strokeStyle=col; cx.lineWidth=D(0.7); cx.stroke();
-  cx.restore();
-  t(fn,x,y-r*0.42,col,6,'700'); t(loop,x,y+r*0.45,col,5.3,'700');
-}
-// control-valve actuator (diaphragm symbol on top of a valve)
-function actuator(x,y,col){
-  cx.save(); cx.strokeStyle=col; cx.lineWidth=D(1.1); cx.setLineDash([]);
-  cx.beginPath(); cx.moveTo(X(x),Y(y)); cx.lineTo(X(x),Y(y-12)); cx.stroke();
-  cx.beginPath(); cx.moveTo(X(x-6),Y(y-12)); cx.lineTo(X(x+6),Y(y-12)); cx.lineTo(X(x),Y(y-19)); cx.closePath();
-  cx.stroke(); cx.restore();
-}
-
-// Rectangular plate heat exchanger with 4 ports
-function hxRect(x,y,w,h,alpha){
-  cx.save(); cx.globalAlpha=alpha||1;
-  if(alpha>0.2) glow(x+w/2,y+h/2,w*1.1,'rgb(129,140,248)',alpha*0.14);
-  rr(x,y,w,h,2,'#070a14','#a5b4fc',1.8);
-  cx.fillStyle='rgba(129,140,248,0.10)';
-  cx.fillRect(X(x+3),Y(y+3),D(w-6),D(6));
-  cx.fillRect(X(x+3),Y(y+h-9),D(w-6),D(6));
-  cx.strokeStyle='rgba(129,140,248,0.30)'; cx.lineWidth=D(0.7); cx.setLineDash([]);
-  const plates=12;
-  for(let i=1;i<plates;i++){
-    const px=x+(w/plates)*i;
-    cx.beginPath(); cx.moveTo(X(px),Y(y+11)); cx.lineTo(X(px),Y(y+h-11)); cx.stroke();
-  }
-  cx.strokeStyle='rgba(129,140,248,0.35)'; cx.lineWidth=D(0.8);
-  cx.beginPath(); cx.moveTo(X(x+5),Y(y+h/2)); cx.lineTo(X(x+w-5),Y(y+h/2)); cx.stroke();
-  [[x,y+12],[x,y+h-12],[x+w,y+12],[x+w,y+h-12]].forEach(([px,py])=>{
-    cx.beginPath(); cx.arc(X(px),Y(py),D(4),0,Math.PI*2);
-    cx.fillStyle='#0a0f18'; cx.fill();
-    cx.strokeStyle='#a5b4fc'; cx.lineWidth=D(1.4); cx.stroke();
+/* ============================ svg chart ============================ */
+function svgChart(opts){
+  var W=opts.W||520,H=opts.H||260,pad=opts.pad||28,n=opts.n,ymin=opts.ymin,ymax=opts.ymax;
+  var X=function(i){return pad+ (n>1? i/(n-1):0)*(W-2*pad);};
+  var Y=function(v){return H-pad-(v-ymin)/(ymax-ymin)*(H-2*pad);};
+  var s='<svg viewBox="0 0 '+W+' '+H+'" width="100%" height="'+H+'" preserveAspectRatio="none" style="overflow:visible">';
+  // grid
+  for(var g=0;g<=4;g++){var yy=pad+g*(H-2*pad)/4;s+='<line x1="'+pad+'" y1="'+yy+'" x2="'+(W-pad)+'" y2="'+yy+'" stroke="#eef2f7" stroke-width="1"/>';}
+  // shaded x region (fractional)
+  if(opts.shade){var x1=X(opts.shade.from),x2=X(opts.shade.to);
+    s+='<rect x="'+x1+'" y="'+pad+'" width="'+(x2-x1)+'" height="'+(H-2*pad)+'" fill="'+(opts.shade.color||"#fff7ed")+'"/>';}
+  // band
+  if(opts.band){var hi=opts.band.hi,lo=opts.band.lo,pts="";
+    for(var i=0;i<hi.length;i++){pts+=X(i)+","+Y(hi[i])+" ";}
+    for(var j=lo.length-1;j>=0;j--){pts+=X(j)+","+Y(lo[j])+" ";}
+    s+='<polygon points="'+pts+'" fill="'+opts.band.color+'" fill-opacity="0.12"/>';}
+  // lines (handle nulls = pen up)
+  (opts.lines||[]).forEach(function(ln){
+    var d="",pen=false;
+    for(var i=0;i<ln.vals.length;i++){var v=ln.vals[i];
+      if(v===null||v===undefined){pen=false;continue;}
+      d+=(pen?"L":"M")+X(i).toFixed(1)+" "+Y(v).toFixed(1)+" ";pen=true;}
+    if(d)s+='<path d="'+d+'" fill="none" stroke="'+ln.color+'" stroke-width="'+(ln.width||2)+'" stroke-opacity="'+(ln.opacity==null?1:ln.opacity)+'"'+(ln.dash?' stroke-dasharray="4 3"':'')+' stroke-linejoin="round"/>';
   });
-  t('PLATE HEAT EXCHANGER',x+w/2,y-11,'#a5b4fc',8,'700');
-  t('HX',x+w/2,y+h/2-9,'#c7d2fe',10,'700');
-  t('water ⇄ glycol',x+w/2,y+h/2+9,'#5b6db8',6.5,'600');
-  cx.restore();
+  s+='</svg>';return s;
 }
 
-function drawV1(vcx,vcy,mode,alpha){
-  const col=mode==='charge'?C.chg:mode==='discharge'?C.warm:'#475569';
-  if(mode!=='standby') glow(vcx,vcy,28,mode==='charge'?'rgb(96,165,250)':'rgb(251,191,36)',alpha*0.22);
-  actuator(vcx,vcy-18,col);
-  cx.save(); cx.globalAlpha=0.6+alpha*0.4;
-  cx.fillStyle=col;
-  cx.beginPath(); cx.moveTo(X(vcx-14),Y(vcy)); cx.lineTo(X(vcx),Y(vcy-10)); cx.lineTo(X(vcx),Y(vcy+10)); cx.closePath(); cx.fill();
-  cx.beginPath(); cx.moveTo(X(vcx+14),Y(vcy)); cx.lineTo(X(vcx),Y(vcy-10)); cx.lineTo(X(vcx),Y(vcy+10)); cx.closePath(); cx.fill();
-  cx.strokeStyle=col; cx.lineWidth=D(2); cx.setLineDash([]);
-  cx.beginPath(); cx.moveTo(X(vcx),Y(vcy-10)); cx.lineTo(X(vcx),Y(vcy-18)); cx.stroke();
-  cx.beginPath(); cx.arc(X(vcx),Y(vcy),D(18),0,Math.PI*2); cx.strokeStyle=col; cx.lineWidth=D(1); cx.stroke();
-  cx.beginPath(); cx.arc(X(vcx),Y(vcy),D(3.5),0,Math.PI*2); cx.fillStyle='#0a0f18'; cx.fill(); cx.strokeStyle=col; cx.lineWidth=D(1); cx.stroke();
-  cx.restore();
-  t('V1',vcx,vcy,'#e2e8f0',7,'700');
-  const ml=mode==='charge'?'CHARGE':mode==='discharge'?'DISCH':'STBY';
-  t(ml,vcx,vcy+27,col,6.5,'700');
-  t('FV-101',vcx,vcy+35,'#2a3d5c',5.5,'700');
+/* ============================ state + shell ============================ */
+var state={panel:0,auto:true,hcs:HCS_IDS[0],tick:0};
+var timers=[];
+function clearTimers(){timers.forEach(function(t){clearTimeout(t);clearInterval(t);});timers=[];}
+function later(fn,ms){var id=setTimeout(fn,ms);timers.push(id);return id;}
+function every(fn,ms){var id=setInterval(fn,ms);timers.push(id);return id;}
+
+var stage=document.getElementById("stage");
+var hcsSel=document.getElementById("hcs");
+HCS_IDS.forEach(function(id){var o=document.createElement("option");o.textContent=id;hcsSel.appendChild(o);});
+hcsSel.onchange=function(){state.hcs=hcsSel.value;render();};
+document.getElementById("autoBtn").onclick=function(){state.auto=!state.auto;
+  this.textContent=state.auto?"Auto ▮▮":"Auto ▶";this.classList.toggle("btn-dark",state.auto);scheduleAuto();};
+document.getElementById("prevBtn").onclick=function(){go(state.panel-1);};
+document.getElementById("nextBtn").onclick=function(){go(state.panel+1);};
+document.getElementById("replayBtn").onclick=function(){render();};
+function go(n){state.panel=(n+5)%5;render();}
+
+var progEl=document.getElementById("prog");
+function buildProg(){progEl.innerHTML="";TITLES.forEach(function(t,idx){
+  var b=document.createElement("button");b.className="seg"+(idx===state.panel?" active":"");
+  b.innerHTML='<div class="bar"><div class="fill" style="width:'+(idx<=state.panel?100:0)+'%"></div></div><div class="lbl">'+(idx+1)+". "+t+'</div>';
+  b.onclick=function(){go(idx);};progEl.appendChild(b);});}
+
+var autoTimer=null;
+function scheduleAuto(){if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}
+  if(state.auto){autoTimer=setTimeout(function(){go(state.panel+1);},PANEL_MS);}}
+
+function render(){
+  clearTimers();
+  document.getElementById("ptitle").textContent=(state.panel+1)+". "+TITLES[state.panel];
+  buildProg();
+  if(state.panel===0)panelData();
+  else if(state.panel===1)panelPrep();
+  else if(state.panel===2)panelModels();
+  else if(state.panel===3)panelEnsemble();
+  else panelSelect();
+  scheduleAuto();
 }
 
-function drawV2(vcx,vcy,alpha,mixPct){
-  const col=alpha>0.3?'#a78bfa':'#475569';
-  if(alpha>0.3) glow(vcx,vcy,26,'rgb(167,139,250)',alpha*0.22);
-  actuator(vcx,vcy-18,col);
-  cx.save(); cx.globalAlpha=0.6+alpha*0.4;
-  // east port (cold in 32°F) — tinted green when flowing
-  cx.fillStyle=alpha>0.3?C.cold:col;
-  cx.beginPath(); cx.moveTo(X(vcx+14),Y(vcy)); cx.lineTo(X(vcx+2),Y(vcy-9)); cx.lineTo(X(vcx+2),Y(vcy+9)); cx.closePath(); cx.fill();
-  // south port (warm bypass in) — tinted amber
-  cx.fillStyle=alpha>0.3?C.warm:col;
-  cx.beginPath(); cx.moveTo(X(vcx),Y(vcy+14)); cx.lineTo(X(vcx-7),Y(vcy+2)); cx.lineTo(X(vcx+7),Y(vcy+2)); cx.closePath(); cx.fill();
-  // west port (60°F mix out) — tinted cyan
-  cx.fillStyle=alpha>0.3?C.mix:col;
-  cx.beginPath(); cx.moveTo(X(vcx-14),Y(vcy)); cx.lineTo(X(vcx-2),Y(vcy-9)); cx.lineTo(X(vcx-2),Y(vcy+9)); cx.closePath(); cx.fill();
-  cx.beginPath(); cx.arc(X(vcx),Y(vcy),D(18),0,Math.PI*2); cx.strokeStyle=col; cx.lineWidth=D(1); cx.stroke();
-  cx.beginPath(); cx.arc(X(vcx),Y(vcy),D(3.5),0,Math.PI*2); cx.fillStyle='#0a0f18'; cx.fill(); cx.strokeStyle=col; cx.lineWidth=D(1); cx.stroke();
-  cx.restore();
-  t('V2',vcx,vcy,'#e2e8f0',7,'700');
-  t('MIX',vcx,vcy+27,col,6.5,'700');
-  t('FV-102',vcx,vcy+35,'#2a3d5c',5.5,'700');
+/* sticky helper */
+function sticky(tone,title,html){return '<div class="sticky '+tone+'"><div class="t">'+title+'</div>'+html+'</div>';}
+
+/* ============================ Panel 1 ============================ */
+function panelData(){
+  var TOTAL=5040;
+  stage.innerHTML=
+    '<div class="grid3"><div>'+
+      '<div class="row" style="margin-bottom:8px"><div style="font-size:13px;font-weight:700;color:var(--s700)">train_data · '+state.hcs+' · hourly index</div>'+
+      '<div class="mono" style="font-size:13px"><span id="cnt" style="font-weight:800;color:var(--s900)">0</span><span style="color:var(--s400)"> / 5,040 rows</span></div></div>'+
+      '<div class="card" style="overflow:hidden"><table><thead><tr><th>timestamp</th><th class="right">temperature (°C)</th><th class="right">humidity (%)</th><th class="right">value (RT / kW)</th></tr></thead>'+
+      '<tbody id="tbody" class="mono"></tbody></table><div style="height:4px;background:var(--s100)"><div id="pbar" style="height:100%;background:#ea580c;width:0;transition:width .1s"></div></div></div>'+
+    '</div><div>'+
+      sticky("blue","Exogenous features","temperature + humidity (from Tomorrow.io / Visual Crossing / NWS / NOAA)")+
+      sticky("slate","Target (value)","hourly cooling demand (RT) or building power (kW)")+
+      sticky("amber","Training window",'7 months hourly = 5,040 expected rows<div class="code">FORECAST_TRAINING_RANGE = timedelta(days=30*7)</div>')+
+      sticky("amber","Data-quality scores (per run)","historic_data_integrity and weather_data_integrity = actual rows / 5040")+
+    '</div></div>';
+  var cnt=0,cntEl=document.getElementById("cnt"),tb=document.getElementById("tbody"),pb=document.getElementById("pbar");
+  every(function(){cnt=Math.min(TOTAL,cnt+63);cntEl.textContent=cnt.toLocaleString();
+    pb.style.width=(cnt/TOTAL*100)+"%";
+    var start=Math.max(0,cnt-9),rows="";
+    for(var i=start;i<start+9 && i<Math.max(9,cnt);i++){var r=rowFor(i);
+      rows+='<tr><td style="color:var(--s600)">'+r.ts+'</td><td class="right" style="color:#2563eb">'+r.temp+'</td><td class="right" style="color:#0891b2">'+r.hum+'</td><td class="right" style="font-weight:700;color:var(--s900)">'+r.val+'</td></tr>';}
+    tb.innerHTML=rows;
+    if(cnt>=TOTAL){/*done*/}
+  },50);
 }
 
-function pipeJump(cx_,cy_,col,vertical){
-  cx.save(); cx.strokeStyle=col; cx.lineWidth=D(2.5); cx.lineCap='round'; cx.setLineDash([]);
-  cx.beginPath();
-  if(vertical) cx.arc(X(cx_),Y(cy_),D(6),Math.PI,0);
-  else cx.arc(X(cx_),Y(cy_),D(6),Math.PI*1.5,Math.PI*0.5);
-  cx.stroke(); cx.restore();
-}
-
-// ═══ MAIN DIAGRAM ═══
-function drawAll(){
-  const W=cv.width,H=cv.height;
-  cx.clearRect(0,0,W,H); cx.fillStyle='#0d1117'; cx.fillRect(0,0,W,H);
-
-  const tes=S.lvl, hf=S.t*24;
-  const charging=S.charging;
-  const discharging=tes>0.05;
-  const tesA=Math.max(0,tes-0.04);
-  const chA=charging?0.7:0.08;
-  const gA = 0.1 + tesA*0.9;
-
-  // precool dynamics (water side) — HX inert at 70°F when TES idle, down to 65°F at full discharge
-  const precoolFr = Math.min(1, tesA/0.6);
-  const precoolT  = 70 - 5*precoolFr;
-  const precoolCol = lerpHex(C.ret,C.pre,precoolFr);
-
-  // ═════════════ WATER LOOP (always active) ═════════════
-  pipe([[182,100],[205,100],[205,310],[182,310]],C.sup,3.5,S.fW,0.9);
-  arrow(205,205,Math.PI/2,C.sup,5.5,0.9);
-  pipe([[182,378],[260,378],[320,378],[320,313]],C.ret,3.5,S.fW,0.9);
-  arrow(238,378,0,C.ret,5.5,0.9);
-  pipe([[320,247],[320,65],[182,65]],precoolCol,3.2,S.fW,0.8);
-  arrow(320,150,-Math.PI/2,precoolCol,5,0.8);
-  // line numbers (P&ID)
-  t('8"-CHWS · 60°F',209,150,'#1f3a5c',6,'600','left');
-  t('8"-CHWR · 70°F',250,392,'#5c2730',6,'600','left');
-  t('8"-CHWP',300,90,'#3a5066',6,'600','left');
-
-  // ═════════════ GLYCOL DISCHARGE LOOP ═════════════
-  // (1) 32°F COLD from IceBricks → V1
-  pipe([[715,290],[700,290]],C.cold,3,S.fG,gA);
-  // (1b) V1 west → up → V2 east (routed above the bypass)
-  pipe([[686,290],[645,290],[645,242],[500,242]],C.cold,3,S.fG,gA);
-  arrow(600,242,Math.PI,C.cold,5,gA);
-  // (2) 60°F MIX from V2 west → HX glycol-in (clear cyan run)
-  pipe([[472,242],[450,242],[440,247]],C.mix,3.4,S.fG,Math.max(gA,0.25));
-  arrow(458,242,Math.PI,C.mix,5,Math.max(gA,0.25));
-  // (3) ~65°F WARM from HX glycol-out → P1 → T-junction
-  pipe([[440,313],[525,313],[620,313]],C.warm,2.8,S.fG,0.12+tesA*0.85);
-  arrow(480,313,0,C.warm,5,0.12+tesA*0.8);
-  // (4) BYPASS branch: T → up → west → V2 south port
-  pipe([[620,313],[620,278],[486,278],[486,256]],C.warm,2.5,S.fG,0.1+tesA*0.75);
-  arrow(560,278,Math.PI,C.warm,4.5,0.1+tesA*0.7);
-  // (5) RETURN branch: T → east → down → IceBricks warm port (heads back to be re-chilled)
-  pipe([[620,313],[680,313],[680,400],[715,400]],C.warm,2.5,S.fG,0.1+tesA*0.65);
-  arrow(680,360,Math.PI/2,C.warm,4.5,0.1+tesA*0.6);
-
-  // ═════════════ GLYCOL CHARGE LOOP (now fully animated) ═════════════
-  // (a) N.Chiller cold-out → P4 → V1 north
-  pipe([[680,230],[700,230],[700,272]],C.chg,2.8,S.fC,chA);
-  arrow(700,255,Math.PI/2,C.chg,4.5,chA);
-  // (b) V1 → IceBricks cold port
-  pipe([[700,290],[715,290]],C.chg,2.8,S.fC,chA);
-  // (c) Charge RETURN — animated loop from IceBricks back to N.Chiller
-  pipe([[805,458],[805,478],[545,478],[545,230]],C.chg,2.0,S.fC,chA*0.95);
-  if(chA>0.3){ arrow(670,478,Math.PI,C.chg,4.5,chA*0.9); arrow(545,360,-Math.PI/2,C.chg,4.5,chA*0.9); t('charge return',690,487,C.chg,6.3,'700'); t('4"-GLY-CHG',548,300,'#2a4a6e',6,'600','left'); }
-
-  // ═════════════ GLYCOL TEMP TAGS ═════════════
-  cx.globalAlpha=0.15+tesA*0.85;
-  t('32°F',665,279,C.cold,7,'700');
-  t('60°F mix',446,232,C.mix,7,'700','right');
-  t('~65°F',548,305,C.warm,7,'700','left');
-  t('warm bypass',548,270,C.warm,6.5,'700','left');
-  t('warm → IB (re-chill)',686,378,C.warm,6.5,'700','left');
-  cx.globalAlpha=1;
-  cx.globalAlpha=chA*0.9;
-  t('~28°F',708,260,C.chg,7,'700','left');
-  cx.globalAlpha=1;
-
-  // ═════════════ OPTIMIZER COMMAND / SIGNAL LINES ═════════════
-  dottedLine([[97,140],[97,12],[610,12],[610,28]],C.cmd,0.28);   // meter → optimizer
-  dottedLine([[760,148],[760,128]],C.cmd,0.32);                  // SOC → optimizer
-  cx.save();
-  cx.globalAlpha=discharging?0.6:0.18;
-  cx.strokeStyle=C.cmd; cx.lineWidth=D(1); cx.setLineDash([D(3),D(4)]);
-  cx.beginPath();
-  cx.moveTo(X(720),Y(126)); cx.lineTo(X(720),Y(265));                               // → V1
-  cx.moveTo(X(560),Y(126)); cx.lineTo(X(560),Y(160)); cx.lineTo(X(486),Y(160)); cx.lineTo(X(486),Y(224)); // → V2
-  cx.stroke(); cx.restore();
-  if(discharging){
-    cx.globalAlpha=0.7;
-    t('▼ FV-101',724,135,C.cmd,6,'700','left');
-    t('▼ FV-102',490,153,C.cmd,6,'700','left');
-    cx.globalAlpha=1;
-  }
-
-  // ═════════════ INSTRUMENTS (ISA-tagged) ═════════════
-  isa(230,360,'TT','201','#5c7a99');      // water return temp
-  isa(268,360,'FT','202','#5c7a99');      // water flow
-  isa(305,212,'TT','203','#5c7a99');      // HX water-out (precool)
-  t(precoolT.toFixed(1)+'°F',326,212,precoolCol,7.5,'700','left');
-  isa(458,330,'TT','204','#7a6a99');      // glycol-out temp
-
-  // ═════════════ PUMPS ═════════════
-  pump(295,378,12,'P1','P-102','right');  // water return
-  pump(525,313,12,'P2','P-101','right');  // warm glycol header
-  pump(700,250,12,'P4','P-104','down');   // charge
-
-  // ═════════════ HX (RECTANGULAR PLATE) + visible heat-exchange gradients ═════════════
-  hxRect(320,235,120,90,0.3+tesA*0.7);
-  // water pass gradient (left): 70°F in (bottom) → precool (top)
-  let wg=cx.createLinearGradient(0,Y(312),0,Y(250)); wg.addColorStop(0,C.ret); wg.addColorStop(1,precoolCol);
-  cx.save(); cx.fillStyle=wg; cx.globalAlpha=0.55; cx.fillRect(X(326),Y(250),D(7),D(62)); cx.restore();
-  // glycol pass gradient (right): 60°F mix in (top) → 65°F warm out (bottom)
-  let gg=cx.createLinearGradient(0,Y(250),0,Y(312)); gg.addColorStop(0,C.mix); gg.addColorStop(1,C.warm);
-  cx.save(); cx.fillStyle=gg; cx.globalAlpha=0.15+tesA*0.5; cx.fillRect(X(427),Y(250),D(7),D(62)); cx.restore();
-  if(tesA>0.1){ cx.globalAlpha=0.5+tesA*0.4; t('+5°F',446,305,C.warm,6,'700','left'); t('−5°F',314,255,precoolCol,6,'700','right'); cx.globalAlpha=1; }
-  t('HX-101',440,330,'#3a4d70',5.5,'700','right');
-
-  // ═════════════ V1 / V2 ═════════════
-  const v1mode=charging?'charge':discharging?'discharge':'standby';
-  drawV1(700,290,v1mode,Math.max(chA,tesA));
-  const mixPct=Math.round(5/33*100);
-  drawV2(486,242,tesA,mixPct);
-
-  // ═════════════ CUSTOMER — CHILLER ARRAY (reacts to ambient AND TES relief) ═════════════
-  const nRun=S.nRun, nRel=S.nRel;
-  const loadFr=Math.min(1,Math.max(0,(S.chillerAux-7)/7));   // per-chiller load intensity
-  rr(12,28,170,92,8,'#060a12',nRel>0?'rgba(56,189,248,0.55)':'rgba(56,189,248,0.3)',1.5);
-  t('CHILLER ARRAY',97,46,C.sup,9.5,'700');
-  t('CH-101 · 12 × 600 TR · N+1',97,58,'#1e3050',6.5);
-  for(let i=0;i<12;i++){
-    const c=i%6,r_=Math.floor(i/6);
-    const bx=20+c*27, by=70+r_*22;
-    let bg,bd,sym,sc2;
-    if(i<nRun){ // running — brightness scales with load
-      const b=0.35+loadFr*0.55;
-      bg='#04121f'; bd='rgba(56,189,248,'+b+')'; sym='▮'; sc2='rgba(56,189,248,'+(0.5+loadFr*0.5)+')';
-    } else if(i<nRun+nRel){ // relieved by TES
-      bg='#031009'; bd=C.cold; sym='↓'; sc2=C.cold;
-    } else { // standby
-      bg='#080c14'; bd='#14213a'; sym='·'; sc2='#14213a';
-    }
-    rr(bx,by,23,16,2,bg,bd,0.8);
-    t(sym,bx+11.5,by+8,sc2,7,'700');
-  }
-  if(nRel>0) t(nRel+' relieved by TES',97,113,C.cold,7,'700');
-  else t('holding 60°F · COP '+S.cop.toFixed(1),97,113,'#3a5070',6.5,'700');
-  cx.fillStyle=precoolCol; cx.beginPath(); cx.arc(X(182),Y(65),D(2.5),0,Math.PI*2); cx.fill();
-  cx.fillStyle=C.sup; cx.beginPath(); cx.arc(X(182),Y(100),D(2.5),0,Math.PI*2); cx.fill();
-
-  // ═════════════ CUSTOMER — MAIN METER (with no-TES ghost) ═════════════
-  const mCol=S.meter>32.5?C.ret:S.meter>30.8?C.warm:C.cold;
-  rr(12,140,170,128,8,'#060a12','#334155',1.5);
-  cx.save(); cx.setLineDash([D(4),D(3)]); cx.strokeStyle='rgba(180,83,9,0.55)'; cx.lineWidth=D(1);
-  cx.beginPath();
-  cx.moveTo(X(16),Y(144)); cx.lineTo(X(178),Y(144)); cx.lineTo(X(178),Y(264)); cx.lineTo(X(16),Y(264)); cx.closePath();
-  cx.stroke(); cx.restore();
-  t('MAIN METER',97,156,'#cbd5e1',9,'700');
-  t('MTR-101 · 33 MW CAP',97,167,'#3a5070',6.5);
-  t(S.meter.toFixed(1),97,190,mCol,20,'700');
-  t('MW',125,196,mCol,8,'700','left');
-  // bar: actual (solid) + no-TES ghost (translucent, can exceed cap)
-  const bx0=24,bw=146;
-  const frac=v=>Math.min(1,Math.max(0,(v-20)/(36-20)));
-  rr(bx0,217,bw,8,3,'#03050a',null);
-  // ghost overlay (no-TES)
-  if(S.rawMeter>S.meter+0.05){
-    cx.fillStyle='rgba(248,113,113,0.30)'; cx.fillRect(X(bx0),Y(217),D(bw*frac(S.rawMeter)),D(8));
-  }
-  cx.fillStyle=mCol+'66'; cx.fillRect(X(bx0),Y(217),D(bw*frac(S.meter)),D(8));
-  // target tick + cap tick
-  const tgtX=bx0+bw*frac(S.tgt), capX=bx0+bw*frac(CAP_MW);
-  cx.save(); cx.setLineDash([]); cx.strokeStyle=C.warm; cx.lineWidth=D(1); cx.beginPath(); cx.moveTo(X(tgtX),Y(214)); cx.lineTo(X(tgtX),Y(228)); cx.stroke();
-  cx.setLineDash([D(2),D(2)]); cx.strokeStyle='rgba(248,113,113,0.6)'; cx.lineWidth=D(0.9); cx.beginPath(); cx.moveTo(X(capX),Y(214)); cx.lineTo(X(capX),Y(228)); cx.stroke(); cx.restore();
-  t('tgt',tgtX,233,'rgba(251,191,36,0.7)',5.5,'700'); t('cap 33',capX+1,233,'rgba(248,113,113,0.6)',5.5,'700','left');
-  if(S.rawMeter>S.meter+0.1){ t('▓ no-TES '+S.rawMeter.toFixed(1)+' MW',97,209,'rgba(248,113,113,0.65)',6,'700'); }
-  else { t('chiller + DC kW',97,209,'#1e3050',6.5); }
-  t('IT load',24,247,C.sup,6.5,'700','left'); t(S.it.toFixed(1)+' MW',170,247,C.sup,6.5,'700','right');
-  t('Chillers+aux',24,258,'#7dd3fc',6.5,'700','left'); t((S.meter-S.it).toFixed(1)+' MW',170,258,'#7dd3fc',6.5,'700','right');
-  // electrical taps
-  cx.save(); cx.setLineDash([D(1.5),D(1.5)]); cx.strokeStyle='rgba(180,83,9,0.65)'; cx.lineWidth=D(1.2);
-  cx.beginPath();
-  cx.moveTo(X(60),Y(140)); cx.lineTo(X(60),Y(120));
-  cx.moveTo(X(135),Y(140)); cx.lineTo(X(135),Y(120));
-  cx.moveTo(X(60),Y(268)); cx.lineTo(X(60),Y(290));
-  cx.moveTo(X(135),Y(268)); cx.lineTo(X(135),Y(290));
-  cx.stroke(); cx.restore();
-  t('⚡',60,131,'#b45309',8,'700'); t('⚡',135,131,'#b45309',8,'700');
-  t('⚡',60,279,'#b45309',8,'700'); t('⚡',135,279,'#b45309',8,'700');
-
-  // ═════════════ CUSTOMER — DATA CENTER ═════════════
-  rr(12,290,170,110,8,'#060a12','#1e4d7a',1.5);
-  rr(12,290,170,110,8,null,C.sup,1);
-  t('DATA CENTER',97,307,C.sup,9.5,'700');
-  t('LOAD-101 · 20 MW IT',97,318,'#1e3050',6.5);
-  t('Supply 60°F  ·  Return 70°F  (ΔT 10°F)',97,331,'#94a3b8',6.5,'600');
-  for(let i=0;i<4;i++){
-    rr(22+i*40,344,32,46,2,'#060912','#0f1a2a',0.6);
-    for(let j=0;j<4;j++) rr(25+i*40,348+j*9,26,5,1,'#090f1f','#14213a',0.4);
-  }
-  cx.fillStyle=C.sup; cx.beginPath(); cx.arc(X(182),Y(310),D(2.5),0,Math.PI*2); cx.fill();
-  cx.fillStyle=C.ret; cx.beginPath(); cx.arc(X(182),Y(378),D(2.5),0,Math.PI*2); cx.fill();
-
-  // ═════════════ NOSTROMO TES SYSTEM CONTAINER ═════════════
-  cx.save();
-  cx.setLineDash([D(7),D(4)]); cx.strokeStyle='rgba(167,139,250,0.50)'; cx.lineWidth=D(1.3);
-  rr(508,16,400,478,12,'rgba(167,139,250,0.018)','rgba(167,139,250,0.5)',1.3);
-  cx.restore();
-  rr(540,5,200,22,5,'#1a1230','rgba(167,139,250,0.75)',1.2);
-  t('▮ NOSTROMO TES SYSTEM ▮',640,16,'#c4b5fd',9.5,'700');
-
-  // ── OPTIMIZER ──
-  if(tes>0.1||charging) glow(710,76,80,'rgb(167,139,250)',tes*0.10+0.04);
-  rr(525,28,370,98,8,'#080918','rgba(167,139,250,0.75)',1.5);
-  isa(548,46,'TIC','101',C.cmd,9);
-  t('OPTIMIZER',624,46,C.cmd,10.5,'700');
-  t('model-predictive dispatch · publishes ~22:00 prior day',712,46,'#7c5fb8',6.5,'normal','left');
-  cx.save(); cx.strokeStyle='#1e1538'; cx.lineWidth=D(0.5); cx.beginPath(); cx.moveTo(X(534),Y(58)); cx.lineTo(X(886),Y(58)); cx.stroke(); cx.restore();
-  t('INPUTS',592,68,C.cmd,6.5,'700');
-  t('▸ Meter signal (chiller+DC kW)',534,80,'#5b3f8a',7,'normal','left');
-  t('▸ IceBricks SOC + glycol T',534,92,'#5b3f8a',7,'normal','left');
-  t('▸ SLC NWS 48h temp forecast',534,104,'#5b3f8a',7,'normal','left');
-  t('▸ Day-ahead price curve',534,116,'#5b3f8a',7,'normal','left');
-  cx.save(); cx.strokeStyle='#1e1538'; cx.lineWidth=D(0.5);
-  cx.beginPath(); cx.moveTo(X(710),Y(62)); cx.lineTo(X(710),Y(122)); cx.stroke(); cx.restore();
-  const dCol=tes>0.1?C.cold:'#5b3f8a';
-  t('DISPATCH — HOLD METER ≤ '+S.tgt.toFixed(1)+' MW',808,68,dCol,6.5,'700');
-  t('▸ Forecast peak → set target',720,80,dCol,7,'normal','left');
-  t('▸ Predict chiller kW (COP×amb)',720,92,dCol,7,'normal','left');
-  t('▸ FV-101/102 + P-101 setpoints',720,104,dCol,7,'normal','left');
-  t('▸ Track actual vs target live',720,116,dCol,7,'normal','left');
-
-  // ── NOSTROMO GLYCOL CHILLER ──
-  rr(525,140,170,90,8,'#060a12',charging?'rgba(96,165,250,0.75)':'#14213a',1.3);
-  t('NOSTROMO GLYCOL CHILLER',610,156,'#94a3b8',7.5,'700');
-  t('CH-201 · charges IceBricks off-peak',610,167,'#3a4d70',6);
-  rr(534,175,152,16,3,'#08101a','#1e3050',0.8); t('CONDENSER',610,184,'#4a6080',7,'700');
-  rr(534,193,152,16,3,'#080c18',charging?'#1d4ed8':'#1e3050',charging?1.2:0.8); t('COMPRESSOR',610,202,charging?C.chg:'#3a5070',7,'700');
-  rr(534,211,152,16,3,'#08101a','#1e3050',0.8); t('EVAPORATOR (28°F glycol)',610,220,'#4a6080',7,'700');
-  cx.fillStyle=charging?C.chg:'#1e3050'; cx.beginPath(); cx.arc(X(680),Y(230),D(2.5),0,Math.PI*2); cx.fill();
-  cx.fillStyle=charging?C.chg:'#1e3050'; cx.beginPath(); cx.arc(X(545),Y(230),D(2.5),0,Math.PI*2); cx.fill();
-
-  // ── ICEBRICKS TES ──
-  if(discharging) glow(805,303,90,'rgb(52,211,153)',tes*0.18);
-  if(charging) glow(805,303,90,'rgb(96,165,250)',0.13);
-  rr(715,148,180,310,10,'#030a05','rgba(52,211,153,'+(0.3+tes*0.7)+')',2);
-  t('IceBricks TES',805,166,C.cold,11,'700');
-  t('TK-101 · '+S.cap+' TRh · 32°F glycol',805,179,'#1a4030',7);
-  const liqX=722, liqY=190, liqW=166, liqH=215;
-  cx.fillStyle='#020804'; cx.beginPath(); cx.roundRect(X(liqX),Y(liqY),D(liqW),D(liqH),D(4)); cx.fill();
-  const shimmer=0.26+tes*0.16+0.06*Math.sin(Date.now()/700);
-  cx.fillStyle='rgba(52,211,153,'+shimmer+')';
-  const ft=liqY+liqH*(1-S.soc);
-  cx.beginPath(); cx.roundRect(X(liqX),Y(ft),D(liqW),D(liqH*S.soc),D(4)); cx.fill();
-  cx.strokeStyle='rgba(52,211,153,0.18)'; cx.lineWidth=D(0.8); cx.strokeRect(X(liqX),Y(liqY),D(liqW),D(liqH));
-  cx.globalAlpha=0.12+S.soc*0.16;
-  for(let r_=0;r_<4;r_++) for(let c=0;c<3;c++){
-    cx.strokeStyle=C.cold; cx.lineWidth=D(0.5); cx.setLineDash([]);
-    cx.strokeRect(X(liqX+5+c*53),Y(ft+5+r_*48),D(48),D(40));
-  }
-  cx.globalAlpha=1;
-  // internal re-chill gradient (warm-in bottom → cold-out top) shows ice cooling the glycol
-  let ig=cx.createLinearGradient(0,Y(400),0,Y(290)); ig.addColorStop(0,C.warm); ig.addColorStop(1,C.cold);
-  cx.save(); cx.fillStyle=ig; cx.globalAlpha=0.2+tesA*0.55; cx.fillRect(X(716),Y(292),D(5),D(106)); cx.restore();
-  t('SOC: '+(S.soc*100).toFixed(0)+'%',805,415,'#1a4030',7.5);
-  let bdg,bcol;
-  if(charging){bdg='V1→CHARGING';bcol='#3b82f6';}
-  else if(tes<0.08){bdg='STANDBY';bcol='#14213a';}
-  else if(tes<0.5){bdg='V1→ACTIVATING';bcol=C.warm;}
-  else{bdg='V1→DISCHARGING';bcol=C.cold;}
-  rr(728,427,154,16,4,bcol+'15',bcol,0.9); t(bdg,805,435,bcol,7.5,'700');
-  cx.fillStyle=C.cold; cx.beginPath(); cx.arc(X(715),Y(290),D(3),0,Math.PI*2); cx.fill();
-  cx.fillStyle=C.warm; cx.beginPath(); cx.arc(X(715),Y(400),D(3),0,Math.PI*2); cx.fill();
-  t('cold 32°F',709,290,C.cold,5.5,'700','right');
-  t('warm 65°F',709,400,C.warm,5.5,'700','right');
-
-  // ═════════════ PIPE-JUMPS at charge-return crossings ═════════════
-  if(charging){
-    pipeJump(545,313,C.chg,true);
-    pipeJump(545,278,C.chg,true);
-    pipeJump(545,242,C.chg,true);
-  }
-
-  // ═════════════ WATER PIPE TEMP LABELS ═════════════
-  t('60°F supply ↓',218,113,C.sup,8,'700','left');
-  t('70°F return →',205,393,C.ret,8,'700','left');
-  const precoolLbl = precoolFr<0.04 ? '70°F → chiller (HX inert)' : precoolT.toFixed(1)+'°F precool ↑';
-  t(precoolLbl,218,53,precoolCol,8,'700','left');
-
-  // mix ratio dynamic label
-  if(discharging){
-    rr(372,200,104,16,3,'rgba(167,139,250,0.10)','rgba(167,139,250,0.5)',0.7);
-    t('V2 mix: '+mixPct+'% cold / '+(100-mixPct)+'% bypass',424,208,C.cmd,6.3,'700');
-  }
-
-  // supply temp warning (only if TES ran dry at peak)
-  if(S.temp>60.6){
-    const p=0.6+0.4*Math.abs(Math.sin(Date.now()/280)); cx.globalAlpha=p;
-    rr(14,273,166,10,3,'#1a0505',C.ret,0.8); t('⚠ SUPPLY '+S.temp.toFixed(1)+'°F — TES low',97,278,C.ret,7,'700');
-    cx.globalAlpha=1;
-  }
-
-  // V1 mode banner
-  if(charging||discharging){
-    const lbl=charging?'V1 CHARGE — N.Chiller → P-104 → V1 → IceBricks':'V1 DISCHARGE — IceBricks → V1 → V2 (mix 60°F) → HX';
-    const lCol=charging?C.chg:C.warm;
-    rr(520,462,378,12,3,lCol+'18',lCol,0.6);
-    t(lbl,709,468,lCol,7,'700');
-  }
-
-  // ═════════════ FOOTER · LINE KEY + TITLE BLOCK ═════════════
-  // line / color key (left)
-  rr(8,500,548,44,3,'#060a12','#14213a',0.6);
-  t('LINE & STREAM KEY',16,510,'#2a3d5c',6.5,'700','left');
-  const legs=[
-    {c:C.sup,l:'60°F supply'},{c:C.pre,l:'precool 65–70°F'},{c:C.ret,l:'70°F return / warm'},{c:C.cold,l:'32°F TES cold'},
-    {c:C.mix,l:'60°F mix (V2)'},{c:C.warm,l:'~65°F glycol'},{c:C.chg,l:'charge loop'},{c:C.cmd,l:'optimizer signal'}
-  ];
-  legs.forEach((l,i)=>{
-    const col=i%4, row=Math.floor(i/4);
-    const lx=18+col*135, ly=521+row*11;
-    cx.fillStyle=l.c; cx.fillRect(X(lx),Y(ly),D(11),D(3));
-    t(l.l,lx+15,ly+1.5,'#3a5070',6,'normal','left');
-  });
-  // engineering title block (right)
-  rr(566,500,346,44,3,'#0a0e18','#2a3d5c',0.8);
-  cx.save(); cx.strokeStyle='#1a2740'; cx.lineWidth=D(0.6);
-  cx.beginPath(); cx.moveTo(X(745),Y(500)); cx.lineTo(X(745),Y(544)); cx.stroke();              // vert divider
-  cx.beginPath(); cx.moveTo(X(566),Y(522)); cx.lineTo(X(912),Y(522)); cx.stroke();              // horiz divider
-  cx.restore();
-  t('NOSTROMO ENERGY',572,510,'#c4b5fd',8,'700','left');
-  t('TES DISPATCH — P&ID',572,520,'#5b6db8',6.5,'600','left');
-  t('SLC DATA CENTER · 20 MW IT / 33 MW CAP',572,533,'#3a5070',6,'normal','left');
-  t('DWG  NE-TES-SLC-001',751,509,'#5b6db8',6,'700','left');
-  t('REV  ▲5',751,519,'#5b6db8',6,'700','left');
-  t('SCALE  NTS',830,519,'#5b6db8',6,'700','left');
-  t('DRAWN  Nostromo Eng',751,531,'#3a5070',5.5,'normal','left');
-  t('DATE  2026-05-29',751,539,'#3a5070',5.5,'normal','left');
-}
-
-// ═══ GAUGES ═══
-function arcP(cx2,cy2,r,a0,a1){ const ra=a=>(a-90)*Math.PI/180; const[x0,y0]=[cx2+r*Math.cos(ra(a0)),cy2+r*Math.sin(ra(a0))],[x1,y1]=[cx2+r*Math.cos(ra(a1)),cy2+r*Math.sin(ra(a1))]; return `M${x0},${y0} A${r},${r},0,${a1-a0>180?1:0},1,${x1},${y1}`; }
-function drawG(id,val,mn,mx,unit,dv,ghost,tgt){
-  const el=document.getElementById(id); if(!el) return;
-  const cx2=95,cy2=88,r=70,s=-148,e=148;
-  const A=v=>s+Math.min(1,Math.max(0,(v-mn)/(mx-mn)))*(e-s);
-  const va=A(val);
-  let col;
-  if(dv){ col = val>=dv*.99?'#f87171':val>=dv*.95?'#fbbf24':'#38bdf8'; }
-  else if(tgt!==null&&tgt!==undefined){ const dev=Math.abs(val-tgt); col= dev>1.5?'#f87171':dev>0.6?'#fbbf24':'#34d399'; }
-  else col='#38bdf8';
-  let svg=`<path d="${arcP(cx2,cy2,r,s,e)}" fill="none" stroke="#0d1a2a" stroke-width="9" stroke-linecap="round"/>`;
-  if(dv) svg+=`<path d="${arcP(cx2,cy2,r,A(dv),e)}" fill="none" stroke="rgba(248,113,113,0.12)" stroke-width="9"/>`;
-  if(ghost!==undefined&&ghost!==null&&ghost>val+0.05) svg+=`<path d="${arcP(cx2,cy2,r,va,A(ghost))}" fill="none" stroke="rgba(248,113,113,0.32)" stroke-width="9" stroke-linecap="round"/>`;
-  svg+=`<path d="${arcP(cx2,cy2,r,s,va)}" fill="none" stroke="${col}" stroke-width="9" stroke-linecap="round"/>`;
-  if(tgt!==null&&tgt!==undefined){ const ta=A(tgt); const ra=a=>(a-90)*Math.PI/180;
-    const x0=cx2+(r-7)*Math.cos(ra(ta)),y0=cy2+(r-7)*Math.sin(ra(ta)),x1=cx2+(r+7)*Math.cos(ra(ta)),y1=cy2+(r+7)*Math.sin(ra(ta));
-    svg+=`<line x1="${x0}" y1="${y0}" x2="${x1}" y2="${y1}" stroke="#fbbf24" stroke-width="2"/>`; }
-  if(ghost!==undefined&&ghost!==null&&ghost>val+0.1) svg+=`<text x="${cx2}" y="${cy2-30}" text-anchor="middle" fill="rgba(248,113,113,0.65)" font-size="8" font-family="'Segoe UI',sans-serif">no-TES ${ghost.toFixed(1)}</text>`;
-  svg+=`<text x="${cx2}" y="${cy2}" text-anchor="middle" fill="${col}" font-size="20" font-weight="700" font-family="'Segoe UI',sans-serif" dominant-baseline="middle">${val.toFixed(1)}</text>
-    <text x="${cx2}" y="${cy2+18}" text-anchor="middle" fill="#1e3050" font-size="10" font-family="'Segoe UI',sans-serif">${unit}</text>
-    <text x="${cx2-66}" y="${cy2+30}" fill="#0d1a2a" font-size="8" font-family="'Segoe UI',sans-serif">${mn}</text>`;
-  svg+=`<text x="${cx2+66}" y="${cy2+30}" text-anchor="end" fill="${(tgt!==null&&tgt!==undefined)?'rgba(251,191,36,0.7)':'#0d1a2a'}" font-size="8" font-family="'Segoe UI',sans-serif">${(tgt!==null&&tgt!==undefined)?('tgt '+tgt):mx}</text>`;
-  el.innerHTML=svg;
-}
-function drawSOC(soc,cap){
-  const el=document.getElementById('socS'); if(!el) return;
-  const bw=172,bx=10;
-  el.innerHTML=`<rect x="${bx}" y="7" width="${bw}" height="10" rx="5" fill="#040810"/>
-    <rect x="${bx}" y="7" width="${Math.max(6,soc*bw)}" height="10" rx="5" fill="#34d399" opacity=".6"/>
-    <rect x="${bx}" y="7" width="${bw}" height="10" rx="5" fill="none" stroke="#14213a" stroke-width="1"/>
-    <text x="${bx}" y="24" fill="#34d399" font-size="7.5" font-family="'Segoe UI',sans-serif">${(soc*cap).toFixed(1)} / ${cap} TRh</text>
-    <text x="${bx+bw}" y="24" text-anchor="end" fill="#1e3050" font-size="7.5" font-family="'Segoe UI',sans-serif">${(soc*100).toFixed(0)}%</text>`;
-}
-function drawAmb(amb,cop){
-  const el=document.getElementById('gAmb'); if(!el) return;
-  const mn=50,mx=110,bw=172,bx=10;
-  const fr=Math.min(1,Math.max(0,(amb-mn)/(mx-mn)));
-  const col = amb>=95?'#f87171':amb>=82?'#fbbf24':'#38bdf8';
-  const dz=bx+bw*(95-mn)/(mx-mn);
-  el.innerHTML=`<rect x="${bx}" y="6" width="${bw}" height="10" rx="5" fill="#040810"/>
-    <rect x="${bx}" y="6" width="${Math.max(5,fr*bw)}" height="10" rx="5" fill="${col}" opacity=".55"/>
-    <rect x="${bx}" y="6" width="${bw}" height="10" rx="5" fill="none" stroke="#14213a" stroke-width="1"/>
-    <line x1="${dz}" y1="3" x2="${dz}" y2="19" stroke="rgba(248,113,113,.6)" stroke-width="1"/>
-    <text x="${dz}" y="27" text-anchor="middle" fill="rgba(248,113,113,.5)" font-size="6" font-family="'Segoe UI',sans-serif">95° design</text>
-    <text x="${bx}" y="26" fill="${col}" font-size="9" font-weight="700" font-family="'Segoe UI',sans-serif">${amb.toFixed(0)}°F</text>
-    <text x="${bx+bw}" y="26" text-anchor="end" fill="#5b6db8" font-size="7.5" font-family="'Segoe UI',sans-serif">chiller COP ${cop.toFixed(1)}</text>`;
-}
-
-// ═══ PROFILE CHART ═══
-let pCh=null,lastHr=-1;
-function buildPC(){
-  const e=document.getElementById('pc'); e.style.width='100%';
-  pCh=new Chart(e.getContext('2d'),{type:'line',data:{labels:Array.from({length:24},(_,i)=>i+':00'),datasets:[
-    {label:'forecast',data:[...MC],borderColor:'#f87171',borderWidth:1.5,pointRadius:0,tension:.4,yAxisID:'y'},
-    {label:'target',data:Array(24).fill(TGT),borderColor:'rgba(251,191,36,.75)',borderDash:[5,3],borderWidth:1,pointRadius:0,yAxisID:'y'},
-    {label:'cap',data:Array(24).fill(CAP_MW),borderColor:'rgba(248,113,113,.4)',borderDash:[2,2],borderWidth:1,pointRadius:0,yAxisID:'y'},
-    {label:'TR',data:[...DC_],borderColor:'#34d399',backgroundColor:'rgba(52,211,153,0.08)',borderWidth:1.5,pointRadius:0,tension:.4,fill:true,yAxisID:'y2'}
-  ]},options:{animation:false,responsive:true,maintainAspectRatio:false,
-    plugins:{legend:{display:false},tooltip:{enabled:false}},
-    scales:{x:{ticks:{color:'#14213a',font:{size:6.5},maxRotation:0,maxTicksLimit:6},grid:{color:'rgba(14,25,50,.8)'}},
-      y:{position:'left',min:24,max:36,ticks:{color:'rgba(248,113,113,.5)',font:{size:6.5}},grid:{color:'rgba(14,25,50,.8)'}},
-      y2:{position:'right',min:0,max:4,ticks:{color:'rgba(52,211,153,.5)',font:{size:6.5}},grid:{drawOnChartArea:false}}}}});
-}
-function updPC(h){ if(!pCh||h===lastHr) return; lastHr=h;
-  pCh.data.datasets[0].pointRadius=MC.map((_,i)=>i===h?4:0);
-  pCh.data.datasets[0].pointBackgroundColor=MC.map((_,i)=>i===h?'#f87171':'transparent');
-  pCh.update('none'); }
-
-// ═══ LOG ═══
-const LEV=[
-  {h:9.5, t:'', m:'Optimizer: morning ramp detected'},
-  {h:10.8,t:'w',m:'Ambient 78°F — chiller COP 5.4, falling'},
-  {h:11.5,t:'w',m:'Forecast peak 33.6 MW > 33 cap — TES required'},
-  {h:11.9,t:'a',m:'FV-101 pre-position: discharge standby'},
-  {h:12.2,t:'a',m:'Meter > target — FV-101 → DISCHARGE'},
-  {h:12.4,t:'a',m:'P-101 start · FV-102 modulating to 60°F mix'},
-  {h:13.0,t:'a',m:'HX water-out 65°F · glycol-in 60°F'},
-  {h:13.5,t:'a',m:'1 chiller relieved · supply held 60.0°F ✓'},
-  {h:14.5,t:'x',m:'PEAK 33.6 MW raw — held to 31.5 MW target'},
-  {h:15.0,t:'a',m:'FV-102 mix: 15% cold (32°F) / 85% bypass'},
-  {h:16.0,t:'a',m:'2 chillers relieved · tracking Δ 0.0 MW ✓'},
-  {h:17.5,t:'', m:'Demand tapering · reducing P-101 flow'},
-  {h:19.0,t:'', m:'Discharge done · FV-101 → STANDBY'},
-  {h:20.0,t:'b',m:'IceBricks 36% SOC — peak shaved 2.0 MW'},
-  {h:21.5,t:'b',m:'Charge assessment: 5+ MW headroom tonight'},
-  {h:22.0,t:'b',m:'FV-101 → CHARGE · P-104 start'},
-  {h:22.1,t:'b',m:'CH-201 → IceBricks at 28°F glycol'},
-  {h:0.5, t:'b',m:'IceBricks 60% · overnight charge'},
-  {h:3.0, t:'b',m:'IceBricks 90% · on schedule'},
-  {h:5.0, t:'b',m:'IceBricks full · P-104 stop · FV-101 STBY'},
-  {h:6.0, t:'', m:'Day-ahead profile ready for next day ✓'},
+/* ============================ Panel 2 ============================ */
+var PRE_STAGES=[
+  {t:"Raw series",d:"outliers + gaps present"},
+  {t:"Outlier removal",d:'bottom 0.5% → NaN · value.quantile(0.005)'},
+  {t:"Interpolate + back-fill",d:'interpolate(method="linear").bfill()'},
+  {t:"Window masking",d:"hours outside 09:00–21:00 (local→UTC) set to 0"},
+  {t:"Normalization",d:"per-model feature scaling — StandardScaler (ARMA) · MinMaxScaler(0,1) (LSTM)"}
 ];
-const LS=new Set();
-function chkLog(h){ LEV.forEach(e=>{ const k=e.h.toFixed(2); if(!LS.has(k)&&Math.abs(h-e.h)<0.2){ LS.add(k); addLog(e.m,e.t); } }); }
-function addLog(msg,type){
-  if(type===undefined) type='';
-  const lg=document.getElementById('log');
-  const h=Math.floor(S.t*24).toString().padStart(2,'0'),m=Math.floor(S.t*1440%60).toString().padStart(2,'0');
-  const d=document.createElement('div'); d.className='ll'+(type?' '+type:'');
-  d.textContent=`${h}:${m}  ${msg}`; lg.appendChild(d); lg.scrollTop=lg.scrollHeight;
-  if(lg.children.length>80) lg.removeChild(lg.children[0]);
+function panelPrep(){
+  var base=buildPre();
+  stage.innerHTML='<div class="grid3"><div>'+
+    '<div id="sbtns" style="margin-bottom:10px"></div>'+
+    '<div class="panelbox"><div id="chart"></div><div class="center" style="font-size:12px;color:var(--s500);margin-top:4px" id="cap"></div></div>'+
+    '</div><div>'+
+      sticky("amber","Shared prepared dataframe",'All 4 models share the same prepared <b>train_data</b> (target + temperature + humidity, hourly index). Each model then takes a different slice and uses different exogenous features.<div class="code">prepare_training_data() · lambda_utils.py</div>')+
+      sticky("slate","Windows (local)","Discharge window 09:00–21:00 · forecast also covers a few context hours before the window")+
+    '</div></div>';
+  var stg=0;
+  function draw(){
+    var btns="";PRE_STAGES.forEach(function(s,idx){btns+='<button class="stagebtn '+(idx===stg?"cur":idx<stg?"done":"")+'" data-i="'+idx+'">'+(idx+1)+". "+s.t+'</button>';});
+    document.getElementById("sbtns").innerHTML=btns;
+    Array.prototype.forEach.call(document.querySelectorAll(".stagebtn"),function(b){b.onclick=function(){stg=+b.getAttribute("data-i");draw();};});
+    var vals=base.map(function(p){var v=p.raw;
+      if(p.gap)v=null;
+      if(stg>=1&&p.outlier)v=null;
+      if(stg>=2){if(v===null)v=p.raw<10?150:p.raw;if(p.gap)v=Math.round(150+Math.sin(p.i/3)*8);}
+      if(stg>=3&&!(p.h>=9&&p.h<=21))v=0;
+      return v;});
+    var ymax=240;
+    if(stg>=4){ // normalization: min-max scale to 0..1
+      var nums=vals.filter(function(x){return x!==null;});
+      var mn=Math.min.apply(null,nums),mx=Math.max.apply(null,nums),rng=(mx-mn)||1;
+      vals=vals.map(function(x){return x===null?null:+((x-mn)/rng).toFixed(3);});
+      ymax=1;
+    }
+    document.getElementById("chart").innerHTML=svgChart({W:540,H:260,n:base.length,ymin:0,ymax:ymax,
+      lines:[{vals:vals,color:"#0f172a",width:2}]});
+    document.getElementById("cap").innerHTML='<b style="color:var(--s900)">Stage '+(stg+1)+': '+PRE_STAGES[stg].t+'</b> — '+PRE_STAGES[stg].d;
+  }
+  draw();
+  every(function(){if(stg<PRE_STAGES.length-1){stg++;draw();}},1700);
 }
 
-// ═══ PHYSICS (pure, deterministic) ═══
-function stepPhysics(dt,silent){
-  S.t=(S.t+dt*S.speed*24)%1;
-  const hf=S.t*24;
-  // diurnal ambient — slider S.amb is the afternoon PEAK; floor ~26°F lower
-  const ambShape=0.5-0.5*Math.cos(2*Math.PI*(hf-4)/24);
-  const ambFloor=S.amb-26;
-  S.ambNow=ambFloor+(S.amb-ambFloor)*ambShape;
-  const aI=Math.max(0,(S.ambNow-60)/45);
-  S.cop=6.6-3.0*aI;                                  // COP collapses as ambient rises
-  S.chillerAux=(6.6+6.0*aI+8.5*aI*aI)*(S.it/20);     // chiller electrical (MW), super-linear
-  const night=(hf<6.5||hf>22);
-  let raw=S.it+S.chillerAux;
-  const headroom=S.tgt-raw;
-  const chg=night&&headroom>1.0&&S.soc<0.999;
-  S.chargeMW= chg?Math.min(headroom*0.6,3.2*(15/S.cap)):0;
-  raw+=S.chargeMW;
-  S.rawMeter=raw;                                    // the "no-TES" meter
-  // optimizer dispatch — shave raw down to target with TES
-  const need=Math.max(0,raw-S.tgt);
-  const socAvail=Math.min(1,S.soc/0.04);
-  const lvlTarget=Math.min(1,need/RELIEF_MAX)*socAvail;
-  S.lvl+=(lvlTarget-S.lvl)*Math.min(1,dt*3);
-  S.reliefMW=S.lvl*RELIEF_MAX*socAvail;
-  S.meter=Math.max(S.it+0.5,raw-S.reliefMW);
-  // SOC
-  if(S.reliefMW>0.01&&S.soc>0) S.soc=Math.max(0,S.soc-dt*DISCH_K*(S.reliefMW/RELIEF_MAX));
-  if(chg) S.soc=Math.min(1,S.soc+dt*CHG_K*(15/S.cap));
-  S.charging=chg;
-  // supply temp held at 60°F unless TES cannot meet the needed shave
-  const unmet=Math.max(0,need-S.reliefMW);
-  S.temp=Math.max(58.5,Math.min(64,60+unmet*0.8));
-  // chiller array counts
-  const perCh=1.05;
-  const nRunRaw=Math.min(12,Math.max(3,Math.round(S.chillerAux/perCh)));
-  S.nRel=Math.max(0,Math.min(nRunRaw-1,Math.round(S.reliefMW/perCh)));
-  S.nRun=nRunRaw-S.nRel;
-  // peaks for savings
-  S.rawPeak=Math.max(S.rawPeak,S.rawMeter);
-  S.actPeak=Math.max(S.actPeak,S.meter);
-  // flow dash offsets
-  S.fW+=dt*95; S.fG+=dt*80*S.lvl; S.fC+=dt*60*(chg?1:0);
-  if(!silent) chkLog(hf);
+/* ============================ Panel 3 ============================ */
+var META={
+  arma:{rows:"last 1,600 rows  (train_data[-1600:] ≈ 67 days)",exog:"temperature + humidity",
+    summary:"AR(4) + MA(2), no differencing · StandardScaler",band:false,
+    phases:["StandardScaler →","fitting AR(4) + MA(2)…","predicting (in-sample, exog)…","forecast ready"],
+    code:'from statsmodels.tsa.arima.model import ARIMA\n# train_data[-1600:]  exog = [temperature, humidity]\nARIMA(order=(4, 0, 2))          # AR(4) + MA(2), d=0\nscaler = StandardScaler()        # zero-mean, unit-variance\nmodel.predict(start, end, exog=weather_forecast)'},
+  greykite:{rows:"full dataframe  (~5,040 hours)",exog:"target only (AUTO seasonality)",
+    summary:"ModelTemplateEnum.AUTO · Silverkite · 95% intervals",band:true,
+    phases:["AUTO template scanning…","seasonality / holidays / trend","fitting Silverkite…","forecast + 95% band"],
+    code:'from greykite.framework.templates ... import ModelTemplateEnum\n# full dataframe (~5040 rows), no manual exog\ntemplate = ModelTemplateEnum.AUTO\ncoverage = 0.95                  # 95% prediction intervals\nforecast_horizon = len(weather_forecast)'},
+  lstm:{rows:"last 5,000 rows  (train_data[-5000:])",exog:"temperature + humidity",
+    summary:"4× LSTM(70) + Dropout(0.2) → Dense(1) · Adam + MSE",band:false,
+    phases:["MinMaxScaler(0,1) ×2","fitting 20 epochs…","recursive inference…","forecast ready"],
+    code:'# Keras / TensorFlow — train_data[-5000:]\n# input (window_size=24, features=3) → [temperature, humidity, value]\nLSTM(70, return_sequences=True); Dropout(0.2)   # ×3\nLSTM(70); Dropout(0.2); Dense(1)\noptimizer="adam", loss="mean_squared_error"\nepochs=20, batch_size=32, WS=24                  # MinMaxScaler(0,1)\n# recursive: predict 1h, append weather, slide window, repeat'},
+  prophet:{rows:"last 1,000 rows  (train_data[-1000:] ≈ 42 days)",exog:"temperature (regressor)",
+    summary:"additive trend + weekly + daily · 90% interval",band:true,
+    phases:["decomposing components…","trend + weekly + daily","model.predict(weather)…","yhat + 90% band"],
+    code:'from prophet import Prophet\n# train_data[-1000:]\nProphet(interval_width=0.9)      # 90% uncertainty\nm.add_regressor("temperature", standardize=False)\nm.predict(weather_forecast_p)    # -> yhat per timestamp'}
+};
+var showCode=false;
+function panelModels(){
+  stage.innerHTML='<div class="row" style="margin-bottom:10px;gap:8px">'+
+    '<div class="muted">Each model runs in its own Lambda container, in parallel, on the same ForecastRun.</div>'+
+    '<label class="muted" style="cursor:pointer"><input type="checkbox" id="codeTog"'+(showCode?" checked":"")+'/> show the actual algorithm config</label></div>'+
+    '<div class="grid4" id="cards"></div>'+
+    '<div style="margin-top:14px">'+sticky("amber","Why four models?",
+      'Different inductive biases handle different patterns: <b>ARMA</b> = linear short memory, <b>Greykite</b> = strong seasonality, <b>LSTM</b> = nonlinear sequence with weather, <b>Prophet</b> = trend + uncertainty. We don\'t pick a model upfront — the data picks (Panel 5).')+'</div>';
+  document.getElementById("codeTog").onchange=function(){showCode=this.checked;ORDER.forEach(function(k){renderCard(k);});};
+  var cards=document.getElementById("cards");
+  ORDER.forEach(function(k){var d=document.createElement("div");d.id="card-"+k;cards.appendChild(d);renderCard(k);startCard(k);});
 }
-// fast deterministic re-simulation from day-start to target t (for scrubbing)
-function simTo(target){
-  S.t=0; S.soc=1; S.lvl=0; S.rawPeak=0; S.actPeak=0; S.fG=0; S.fC=0;
-  const stepT=1/2400, dtEq=stepT/(S.speed*24);
-  let g=0;
-  while(S.t<target-stepT*0.5 && g<6000){ stepPhysics(dtEq,true); g++; }
+var cardState={};
+function renderCard(k){
+  var m=MODELS[k],meta=META[k],cs=cardState[k]||{phase:0,reveal:0};
+  var fc=modelForecast(k);var shown=fc.slice(0,cs.phase>=3?fc.length:cs.reveal);
+  var ys=shown.map(function(p){return p.y;});
+  var chart;
+  if(meta.band){chart=svgChart({W:240,H:96,pad:10,n:shown.length||1,ymin:40,ymax:240,
+      band:{hi:shown.map(function(p){return p.hi;}),lo:shown.map(function(p){return p.lo;}),color:m.hex},
+      lines:[{vals:ys,color:m.hex,width:2.2}]});}
+  else{chart=svgChart({W:240,H:96,pad:10,n:shown.length||1,ymin:40,ymax:240,lines:[{vals:ys,color:m.hex,width:2.2}]});}
+  var lstmExtra="";
+  if(k==="lstm"){
+    var layers=["Input (24, 3)","LSTM(70) ↩","LSTM(70) ↩","LSTM(70) ↩","LSTM(70)","Dense(1)"];
+    var ll=layers.map(function(l){return '<div class="layer'+(cs.phase>=1?" on":"")+'">'+l+'</div>';}).join("");
+    var loss=[];for(var e=0;e<20;e++){loss.push(+(0.9*Math.exp(-e/6)+0.04).toFixed(3));}
+    var lossChart=cs.phase>=1?svgChart({W:120,H:74,pad:6,n:20,ymin:0,ymax:1,lines:[{vals:loss,color:"#7c3aed",width:2}]}):"";
+    lstmExtra='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px"><div>'+ll+'</div><div><div style="font-size:9px;color:var(--s400)">loss · 20 epochs</div>'+lossChart+'</div></div>';
+  }
+  document.getElementById("card-"+k).innerHTML=
+    '<div class="modelcard" style="border-color:'+m.hex+'55">'+
+    '<div class="row"><div style="display:flex;align-items:center;gap:8px"><span style="font-size:20px">'+m.icon+'</span><b style="color:var(--s900)">'+m.name+'</b></div>'+
+    '<button class="btn" style="font-size:10px;padding:4px 8px" data-k="'+k+'" id="rerun-'+k+'">↻ re-run</button></div>'+
+    '<div class="chip" style="margin-top:8px;background:'+m.hex+'22;color:'+m.hex+'"><span class="dot'+(cs.phase<3?" pulse":"")+'" style="background:'+m.hex+'"></span>'+meta.phases[cs.phase]+'</div>'+
+    '<div style="margin-top:8px;font-size:11px;color:var(--s500);line-height:1.5">'+
+      '<div><span style="color:var(--s400)">rows:</span> '+meta.rows+'</div>'+
+      '<div><span style="color:var(--s400)">exog:</span> '+meta.exog+'</div>'+
+      '<div style="color:var(--s600)">'+meta.summary+'</div></div>'+
+    '<div style="height:96px;margin-top:8px">'+chart+'</div>'+
+    lstmExtra+
+    (showCode?'<pre class="code" style="margin-top:8px;font-size:9.5px">'+meta.code.replace(/</g,"&lt;")+'</pre>':'')+
+    '</div>';
+  document.getElementById("rerun-"+k).onclick=function(){startCard(k);};
 }
-
-// ═══ DOM REFRESH ═══
-function refreshDOM(){
-  const hf=S.t*24;
-  drawG('gM',S.meter,20,36,'MW',CAP_MW,S.rawMeter,S.tgt);
-  drawG('gT',S.temp,54,66,'°F',null,null,60);
-  drawSOC(S.soc,S.cap); drawAmb(S.ambNow,S.cop);
-  document.getElementById('sv1').textContent=S.nRun;
-  document.getElementById('sv2').textContent=S.nRel;
-  document.getElementById('sv3').textContent=S.reliefMW.toFixed(1)+' MW';
-  document.getElementById('sv4').textContent=S.lvl>0.05?Math.round(5/33*100)+'%':'—';
-  const d=S.meter-S.tgt, shave=Math.max(0,S.rawPeak-S.actPeak);
-  const tc=d>0.4?'#f87171':d>0.08?'#fbbf24':'#34d399';
-  document.getElementById('trk').innerHTML=
-    `<div class="trkr"><span>Target (optimizer)</span><b style="color:#fbbf24">${S.tgt.toFixed(1)} MW</b></div>`+
-    `<div class="trkr"><span>Actual meter</span><b style="color:${tc}">${S.meter.toFixed(1)} MW</b></div>`+
-    `<div class="trkr"><span>Tracking Δ</span><b style="color:${tc}">${d>=0?'+':''}${d.toFixed(2)} MW</b></div>`+
-    `<div class="trkr"><span>No-TES peak</span><b style="color:#f87171">${S.rawPeak.toFixed(1)} MW</b></div>`+
-    `<div class="trkr"><span>Peak shaved</span><b style="color:#34d399">${shave.toFixed(1)} MW · $${(shave*DEMAND_RATE).toFixed(1)}k/mo</b></div>`;
-  let bdg,bc;
-  if(S.charging){bdg='V1: CHARGING';bc='#3b82f6';}
-  else if(S.lvl<0.08){bdg='STANDBY';bc='#14213a';}
-  else if(S.lvl<0.5){bdg='V1: ACTIVATING';bc='#fbbf24';}
-  else{bdg='V1: DISCHARGING';bc='#34d399';}
-  const b=document.getElementById('badge'); b.textContent=bdg; b.style.cssText=`border-color:${bc};color:${bc};background:${bc}18`;
-  document.getElementById('clock').textContent=Math.floor(hf).toString().padStart(2,'0')+':'+Math.floor(hf*60%60).toString().padStart(2,'0');
-  const sb=document.getElementById('scrub'); if(sb&&document.activeElement!==sb) sb.value=S.t;
-  updPC(Math.floor(hf));
+function startCard(k){
+  cardState[k]={phase:0,reveal:0};renderCard(k);
+  later(function(){cardState[k].phase=1;renderCard(k);},400);
+  later(function(){cardState[k].phase=2;renderCard(k);
+    var rc=0;every(function(){rc++;cardState[k].reveal=rc;renderCard(k);if(rc>=FC_HOURS.length){/*stop via clear below*/}},130);
+  },1500);
+  later(function(){cardState[k].phase=3;renderCard(k);},1500+FC_HOURS.length*130+250);
 }
 
-// ═══ SIM LOOP ═══
-let lt=0;
-function tick(ts){
-  const dt=Math.min((ts-lt)/1000,0.05); lt=ts;
-  if(S.run){ stepPhysics(dt,false); refreshDOM(); }
-  drawAll(); requestAnimationFrame(tick);
+/* ============================ Panel 4 ============================ */
+function panelEnsemble(){
+  var series={};ORDER.forEach(function(k){series[k]=modelForecast(k);});
+  var failed="prophet";var survivors=ORDER.filter(function(k){return k!==failed;});
+  stage.innerHTML='<div class="grid3"><div class="panelbox" style="position:relative">'+
+    '<div id="echart"></div>'+
+    '<div class="floatformula" id="formula" style="opacity:0">ensemble[t] = mean(model_results[t])</div>'+
+    '<div class="center muted" style="margin-top:4px">One day&rsquo;s 09:00–21:00 discharge window (orange) · repeated across the 5-day horizon · lines arrive, then collapse to the ensemble</div>'+
+    '</div><div>'+
+      sticky("slate","Simple by design",'ensemble = per-timestamp mean across the models that succeeded<div class="code">results.mean(axis=1)  ·  ensemble.py</div>')+
+      sticky("amber","A model failed?",'Prophet is missing in this run — the ensemble still works with the remaining models<div class="code">pd.concat([...], axis=1).mean(axis=1)</div>')+
+      sticky("blue","The smart part","The ensemble is intentionally simple. The intelligence is in <b>model selection</b>, not the average — see Panel 5.")+
+    '</div></div>';
+  var arrived=0,collapsed=false;
+  function draw(){
+    var lines=[];
+    survivors.forEach(function(k,i){var vals=series[k].map(function(p){return p.y;});
+      lines.push({vals:vals,color:MODELS[k].hex,width:collapsed?1:2.4,opacity:collapsed?0.35:(i<arrived?1:0)});});
+    if(collapsed){var ens=FC_HOURS.map(function(_,idx){var s=0;survivors.forEach(function(k){s+=series[k][idx].y;});return Math.round(s/survivors.length);});
+      lines.push({vals:ens,color:"#0f172a",width:4});}
+    document.getElementById("echart").innerHTML=svgChart({W:540,H:300,n:FC_HOURS.length,ymin:40,ymax:240,
+      shade:{from:0,to:1,color:"#fff7ed"},lines:lines});
+    document.getElementById("formula").style.opacity=collapsed?1:0;
+  }
+  draw();
+  [1,2,3].forEach(function(n,idx){later(function(){arrived=n;draw();},700*(idx+1));});
+  later(function(){collapsed=true;draw();},3400);
 }
-function toggleSim(){
-  S.run=!S.run; document.getElementById('playbtn').textContent=S.run?'⏸ Pause':'▶ Start';
-  if(S.run&&S.t<0.01){ LS.clear(); document.getElementById('log').innerHTML=''; S.rawPeak=0; S.actPeak=0;
-    addLog('System init · IceBricks 100% · optimizer target 31.5 MW','');
-    addLog('Day-ahead profile loaded · no-TES peak forecast 33.6 MW','b'); }
-}
-function onSl(){
-  S.it=parseFloat(document.getElementById('si').value); S.amb=parseFloat(document.getElementById('sa').value); S.cap=parseInt(document.getElementById('sc_').value);
-  document.getElementById('li').textContent=S.it.toFixed(1)+' MW'; document.getElementById('la').textContent=S.amb+' °F'; document.getElementById('lc').textContent=S.cap+' TRh';
-  // re-evaluate instantaneous physics so the dashboard reflects the new scenario even when paused
-  stepPhysics(0,true); refreshDOM();
-}
-function onScrub(){
-  if(S.run){ S.run=false; document.getElementById('playbtn').textContent='▶ Start'; }
-  simTo(parseFloat(document.getElementById('scrub').value)); refreshDOM();
-}
-const SPDS=[{l:'1×',v:1/2200},{l:'4×',v:1/550},{l:'12×',v:1/183}]; let spi=0;
-function cycleSpeed(){ spi=(spi+1)%SPDS.length; S.speed=SPDS[spi].v; document.getElementById('spd').textContent=SPDS[spi].l; }
-function exportPNG(){ try{ const a=document.createElement('a'); a.download='nostromo_tes_v5.png'; a.href=cv.toDataURL('image/png'); a.click(); }catch(e){} }
 
-// ═══ INIT ═══
-buildPC();
-S.tgt=TGT; S.rawPeak=0; S.actPeak=0;
-stepPhysics(0,true);          // populate derived state for t=0 without advancing time
-refreshDOM();
-lt=performance.now(); requestAnimationFrame(tick);
+/* ============================ Panel 5 ============================ */
+function panelSelect(){
+  stage.innerHTML='<div class="grid3"><div>'+
+    '<div style="font-size:13px;font-weight:700;color:var(--s700);margin-bottom:8px" id="lbhdr"></div>'+
+    '<div class="card" style="overflow:hidden"><table><thead><tr><th>model</th><th class="right">|deviation|</th><th style="width:50%">score</th><th></th></tr></thead><tbody id="lb"></tbody></table></div>'+
+    '<div class="muted" style="margin-top:8px">Winner = lowest absolute deviation → shipped to the planner. The best model is <b style="color:var(--s700)">not fixed</b> — it auto-adapts per HCS and over time.</div>'+
+    '<div class="urlbox" id="url"></div>'+
+    '</div><div>'+
+      sticky("amber","Deviation formula",'deviation[t] = (forecasted_value[t] / actual_historic_value[t]) − 1<div class="code">evaluator.py · calculate_result_deviation</div>')+
+      sticky("slate","Scope & masking","Only within the discharge window 09:00–21:00. Zero-load hours below <b>EPSILON = 10</b> (kW or RT) are masked; mostly-zero history → deviation = NaN.")+
+      sticky("blue","Two evaluators","<b>evaluator</b> — every minute, scores any forecast that now has measured ground truth.<br/><b>first_hour_evaluator</b> — hourly at :45, focused on the most recent plan's first hour (early signal on real-time forecasts).")+
+    '</div></div>';
+  var t=0;
+  function draw(){
+    var winIdx=t%4;
+    var rows=ORDER.map(function(k,i){var isWin=i===winIdx;var jit=((t*7+i*13)%11)/100;
+      var dev=isWin?(0.02+jit*0.3):(0.08+jit+((i+t)%3)*0.06);return {k:k,name:MODELS[k].name,hex:MODELS[k].hex,dev:+dev.toFixed(3),isWin:isWin};});
+    document.getElementById("lbhdr").textContent="evaluator leaderboard · "+state.hcs+" · forecast_type = COOLING · tick "+t;
+    document.getElementById("lb").innerHTML=rows.map(function(r){
+      return '<tr class="lbrow'+(r.isWin?" win":"")+'"><td style="font-weight:700;color:'+r.hex+'">'+r.name+'</td>'+
+        '<td class="right mono" style="font-weight:700;color:var(--s900)">'+r.dev.toFixed(3)+'</td>'+
+        '<td><div class="barwrap"><div class="barfill" style="width:'+Math.min(100,r.dev*220)+'%;background:'+r.hex+'"></div></div></td>'+
+        '<td class="right">'+(r.isWin?'<span class="ship">✓ shipped</span>':'')+'</td></tr>';
+    }).join("");
+    document.getElementById("url").innerHTML='GET /forecast/v2/results/latest/lowest-deviation?hcs_id='+state.hcs+'&amp;forecast_type=COOLING <span style="color:var(--s400)">→ '+rows[winIdx].name+'</span>';
+  }
+  draw();
+  every(function(){t++;draw();},1600);
+}
+
+/* ============================ boot ============================ */
+render();
 </script>
 </body>
 </html>
